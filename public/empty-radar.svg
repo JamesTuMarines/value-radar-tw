@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320">
+  <g fill="none" stroke="#5B6B7F" stroke-width="1.5" opacity="0.7">
+    <circle cx="160" cy="160" r="40"/>
+    <circle cx="160" cy="160" r="80"/>
+    <circle cx="160" cy="160" r="120"/>
+  </g>
+  <g stroke="#5B6B7F" stroke-width="1" opacity="0.4">
+    <line x1="160" y1="40" x2="160" y2="280"/>
+    <line x1="40" y1="160" x2="280" y2="160"/>
+  </g>
+  <line x1="160" y1="160" x2="160" y2="48" stroke="#5B6B7F" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+  <!-- question mark signal dot -->
+  <circle cx="160" cy="160" r="14" fill="#5B6B7F" opacity="0.25"/>
+  <text x="160" y="167" text-anchor="middle" font-family="monospace" font-size="18" fill="#5B6B7F">?</text>
+  <!-- dashed search frame -->
+  <rect x="24" y="24" width="272" height="272" rx="12" fill="none" stroke="#5B6B7F" stroke-width="1.5" stroke-dasharray="8 8" opacity="0.5"/>
+  <g stroke="#5B6B7F" stroke-width="2.5" fill="none" stroke-linecap="round">
+    <path d="M24 64 L24 36 Q24 24 36 24 L64 24"/>
+    <path d="M256 24 L284 24 Q296 24 296 36 L296 64"/>
+    <path d="M296 256 L296 284 Q296 296 284 296 L256 296"/>
+    <path d="M64 296 L36 296 Q24 296 24 284 L24 256"/>
+  </g>
+</svg>

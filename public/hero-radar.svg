@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <defs>
+    <linearGradient id="sweepFade" gradientUnits="userSpaceOnUse" x1="600" y1="600" x2="600" y2="20">
+      <stop offset="0" stop-color="#E8B64C" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#E8B64C" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- concentric rings -->
+  <g fill="none" stroke="#334052" stroke-width="1" opacity="0.5">
+    <circle cx="600" cy="600" r="150"/>
+    <circle cx="600" cy="600" r="300"/>
+    <circle cx="600" cy="600" r="450"/>
+    <circle cx="600" cy="600" r="580"/>
+  </g>
+  <!-- 8 radial tick lines -->
+  <g stroke="#334052" stroke-width="1" opacity="0.35">
+    <line x1="600" y1="20" x2="600" y2="1180"/>
+    <line x1="20" y1="600" x2="1180" y2="600"/>
+    <line x1="190" y1="190" x2="1010" y2="1010"/>
+    <line x1="1010" y1="190" x2="190" y2="1010"/>
+  </g>
+  <!-- tick marks on outer ring -->
+  <g stroke="#4CC3E8" stroke-width="2" opacity="0.4">
+    <line x1="600" y1="20" x2="600" y2="44"/>
+    <line x1="1010" y1="190" x2="993" y2="207"/>
+    <line x1="1180" y1="600" x2="1156" y2="600"/>
+    <line x1="1010" y1="1010" x2="993" y2="993"/>
+    <line x1="600" y1="1180" x2="600" y2="1156"/>
+    <line x1="190" y1="1010" x2="207" y2="993"/>
+    <line x1="20" y1="600" x2="44" y2="600"/>
+    <line x1="190" y1="190" x2="207" y2="207"/>
+  </g>
+  <!-- gold scanning sector (30 degrees) -->
+  <path d="M600 600 L600 20 A580 580 0 0 1 890 98 Z" fill="url(#sweepFade)"/>
+  <line x1="600" y1="600" x2="600" y2="20" stroke="#E8B64C" stroke-width="2" opacity="0.8"/>
+  <!-- data dots -->
+  <g>
+    <circle cx="600" cy="320" r="5" fill="#E8B64C"/>
+    <circle cx="760" cy="380" r="4" fill="#4CC3E8"/>
+    <circle cx="880" cy="520" r="4" fill="#8B7CF6"/>
+    <circle cx="930" cy="760" r="5" fill="#E8B64C" opacity="0.9"/>
+    <circle cx="800" cy="900" r="4" fill="#4CC3E8"/>
+    <circle cx="560" cy="980" r="4" fill="#8B7CF6"/>
+    <circle cx="350" cy="860" r="5" fill="#E8B64C" opacity="0.8"/>
+    <circle cx="240" cy="640" r="4" fill="#4CC3E8"/>
+    <circle cx="320" cy="380" r="4" fill="#8B7CF6"/>
+    <circle cx="470" cy="250" r="5" fill="#E8B64C" opacity="0.7"/>
+    <circle cx="680" cy="700" r="3" fill="#4CC3E8"/>
+    <circle cx="500" cy="520" r="3" fill="#E8B64C"/>
+  </g>
+  <circle cx="600" cy="600" r="6" fill="#E8B64C"/>
+  <circle cx="600" cy="600" r="12" fill="none" stroke="#E8B64C" stroke-width="1" opacity="0.5"/>
+</svg>

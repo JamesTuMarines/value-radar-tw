@@ -1,0 +1,63 @@
+name: 每日更新台股資料並部署
+
+on:
+  schedule:
+    # 台灣時間週一～五 21:00（UTC 13:00），收盤資料與估值皆已公布
+    - cron: '0 13 * * 1-5'
+  workflow_dispatch: {}   # 允許手動觸發（Actions 頁面按 Run workflow）
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  update-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 更新股票資料（TWSE / TPEx / FinMind / HiStock）
+        run: |
+          pip install requests
+          python pipeline/update_data.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 建置網站
+        run: |
+          npm install
+          npm run build
+
+      - name: 把更新的資料提交回 repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/stocks.json
+          git diff --cached --quiet || git commit -m "data: 每日更新 $(date -u +%F)"
+          git push
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: update-and-build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

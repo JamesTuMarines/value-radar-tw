@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 32% 6%;
+    --foreground: 216 24% 93%;
+    --card: 221 27% 9.5%;
+    --card-foreground: 216 24% 93%;
+    --popover: 219 24% 13%;
+    --popover-foreground: 216 24% 93%;
+    --primary: 41 78% 60%;
+    --primary-foreground: 222 32% 6%;
+    --secondary: 219 24% 13%;
+    --secondary-foreground: 216 24% 93%;
+    --muted: 219 24% 13%;
+    --muted-foreground: 216 16% 63%;
+    --accent: 219 24% 13%;
+    --accent-foreground: 216 24% 93%;
+    --destructive: 358 67% 58%;
+    --destructive-foreground: 216 24% 93%;
+    --border: 216 22% 18%;
+    --input: 216 22% 18%;
+    --ring: 41 78% 60%;
+    --radius: 0.75rem;
+    --sidebar-background: 221 27% 9.5%;
+    --sidebar-foreground: 216 24% 93%;
+    --sidebar-primary: 41 78% 60%;
+    --sidebar-primary-foreground: 222 32% 6%;
+    --sidebar-accent: 219 24% 13%;
+    --sidebar-accent-foreground: 216 24% 93%;
+    --sidebar-border: 216 22% 18%;
+    --sidebar-ring: 41 78% 60%;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    @apply bg-canvas text-text-primary font-sans antialiased;
+    font-feature-settings: "tnum";
+  }
+
+  .font-mono,
+  code,
+  pre,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: rgba(232, 182, 76, 0.3);
+    color: #e8ecf1;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0b0e14;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #232b38;
+    border-radius: 6px;
+    border: 2px solid #0b0e14;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #33405266;
+  }
+}
+
+@layer components {
+  .container-site {
+    @apply mx-auto w-full max-w-container px-6 lg:px-10;
+  }
+
+  .card-surface {
+    @apply rounded-xl border border-border-subtle bg-surface;
+  }
+
+  .num {
+    @apply font-mono;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .eyebrow-label {
+    @apply font-mono text-xs uppercase text-text-muted;
+    letter-spacing: 0.1em;
+  }
+}
