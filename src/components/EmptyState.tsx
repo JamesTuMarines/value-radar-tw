@@ -18,7 +18,7 @@ export default function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className={cn('flex flex-col items-center justify-center gap-4 py-16 text-center', className)}>
-      <img src="/empty-radar.svg" alt="" width={160} height={160} className="opacity-80" />
+      <img src="empty-radar.svg" alt="" width={160} height={160} className="opacity-80" />
       <div>
         <p className="text-lg font-bold text-text-primary">{title}</p>
         <p className="mt-1 text-sm text-text-muted">{description}</p>

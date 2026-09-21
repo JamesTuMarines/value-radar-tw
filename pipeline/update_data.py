@@ -8,9 +8,10 @@
   上櫃：TPEx openapi（部分網路環境會擋）→ 失敗時自動改用 FinMind 免費 API
   個股日K：HiStock chartdata（未還原權值 → 本腳本自動偵測分割/減資斷點並調整）
 
-設計原則：
-  - 單一來源失敗不會讓整次更新失敗：缺什麼就沿用前一天的 stocks.json 欄位
-  - 直接讀寫 public/data/stocks.json，前端無需修改
+設計原則（重要）：
+  - 本腳本「永遠以 exit 0 結束」，任何來源失敗都沿用前一天的 stocks.json，
+    確保 GitHub Actions 不會因單日資料源異常而停止部署網站。
+  - 每個網路請求最多重試 3 次（指數退避）。
 
 執行：python pipeline/update_data.py
 """
@@ -46,64 +47,58 @@ def f(x):
         return None
 
 
-def get_json(url, headers=None, timeout=30):
-    r = requests.get(url, headers=headers or UA, timeout=timeout)
-    r.raise_for_status()
-    return r.json()
+def get_json(url, headers=None, timeout=30, tries=3):
+    """帶重試的 GET JSON；最終失敗拋例外（由呼叫端決定如何降級）"""
+    last = None
+    for i in range(tries):
+        try:
+            r = requests.get(url, headers=headers or UA, timeout=timeout)
+            r.raise_for_status()
+            return r.json()
+        except Exception as e:
+            last = e
+            time.sleep(2 ** i)  # 1s, 2s, 4s
+    raise last
 
 
 # ---------------------------------------------------------------- TWSE（上市）
 def fetch_twse():
-    """回傳 (quotes, valuation, revenue, basic) dict by code；失敗回傳空 dict"""
+    """回傳 dict：quote / val / rev / basic（皆 by code）；單項失敗該項為空"""
     base = 'https://openapi.twse.com.tw/v1'
     out = {'quote': {}, 'val': {}, 'rev': {}, 'basic': {}}
-    try:
-        for row in get_json(f'{base}/exchangeReport/STOCK_DAY_ALL'):
-            c = str(row.get('Code', '')).strip()
-            if c:
-                out['quote'][c] = row
-    except Exception as e:
-        print(f'[warn] TWSE 行情失敗: {e}')
-    try:
-        for row in get_json(f'{base}/exchangeReport/BWIBBU_ALL'):
-            c = str(row.get('Code', '')).strip()
-            if c:
-                out['val'][c] = row
-    except Exception as e:
-        print(f'[warn] TWSE 估值失敗: {e}')
-    try:
-        for row in get_json(f'{base}/opendata/t187ap05_L'):
-            c = str(row.get('公司代號', '')).strip()
-            if c:
-                out['rev'][c] = row
-    except Exception as e:
-        print(f'[warn] TWSE 月營收失敗: {e}')
-    try:
-        for row in get_json(f'{base}/opendata/t187ap03_L'):
-            c = str(row.get('公司代號', '')).strip()
-            if c:
-                out['basic'][c] = row
-    except Exception as e:
-        print(f'[warn] TWSE 基本資料失敗: {e}')
+    for key, path, code_field in [
+        ('quote', '/exchangeReport/STOCK_DAY_ALL', 'Code'),
+        ('val', '/exchangeReport/BWIBBU_ALL', 'Code'),
+        ('rev', '/opendata/t187ap05_L', '公司代號'),
+        ('basic', '/opendata/t187ap03_L', '公司代號'),
+    ]:
+        try:
+            for row in get_json(f'{base}{path}'):
+                c = str(row.get(code_field, '')).strip()
+                if c:
+                    out[key][c] = row
+            print(f'[ok] TWSE {key}: {len(out[key])} 筆')
+        except Exception as e:
+            print(f'[warn] TWSE {key} 失敗: {e}')
     return out
 
 
 # ---------------------------------------------------------------- TPEx（上櫃）
 def fetch_tpex():
-    """回傳 (quote, val, rev, basic) dict by code；被擋時回傳 None"""
+    """回傳 dict（quote/val/rev/basic by code）；被擋時回傳 None"""
     try:
         q = get_json('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes')
         basic = get_json('https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O')
         rev = get_json('https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap05_O')
         # 估值（本益比/殖利率/淨值比）web CSV，cp950
+        import csv as _csv
+        import io as _io
         r = requests.get(
             'https://www.tpex.org.tw/web/stock/aftertrading/peratio_analysis/pera_result.php',
             params={'l': 'zh-tw', 'o': 'csv'}, headers=UA, timeout=30)
         r.raise_for_status()
-        import csv as _csv, io as _io
-        text = r.content.decode('cp950', errors='replace')
         val = {}
-        for row in _csv.reader(_io.StringIO(text)):
+        for row in _csv.reader(_io.StringIO(r.content.decode('cp950', errors='replace'))):
             if len(row) >= 6 and row[0].strip().isdigit():
                 val[row[0].strip()] = {
                     'name': row[1].strip(), 'per': f(row[2]),
@@ -123,13 +118,13 @@ def fetch_finmind_valuation(codes):
     """FinMind 免費 API：全市場 PER/PBR/殖利率（涵蓋上櫃）。回傳 {code: {per,pbr,yield}}"""
     out = {}
     try:
-        r = requests.get('https://api.finmindtrade.com/api/v4/data',
-                         params={'dataset': 'TaiwanStockPER',
-                                 'start_date': (datetime.now(TW) - timedelta(days=10)).strftime('%Y-%m-%d')},
-                         headers=UA, timeout=60)
+        r = requests.get(
+            'https://api.finmindtrade.com/api/v4/data',
+            params={'dataset': 'TaiwanStockPER',
+                    'start_date': (datetime.now(TW) - timedelta(days=10)).strftime('%Y-%m-%d')},
+            headers=UA, timeout=60)
         rows = r.json().get('data', [])
-        # 每檔取最新一筆
-        for row in rows:
+        for row in rows:  # 每檔取最新一筆
             c = str(row.get('stock_id', ''))
             if c in codes:
                 out[c] = {'per': f(row.get('PER')), 'pbr': f(row.get('PBR')),
@@ -144,14 +139,16 @@ def fetch_finmind_valuation(codes):
 def fetch_histock(code, days=370):
     u = f'https://histock.tw/stock/chip/chartdata.aspx?no={code}&days={days}&m={HIST_M}'
     h = {**UA, 'Referer': f'https://histock.tw/stock/{code}'}
-    d = get_json(u, h, 20)
+    d = get_json(u, h, 20, tries=3)
     if not d or 'DailyK' not in d:
         raise ValueError('empty')
+
     def parse(key):
         v = d.get(key)
         if isinstance(v, str):
             v = json.loads(v)
         return v or []
+
     dailyk = parse('DailyK')      # [[ts_ms, o, h, l, c], ...]
     vols = parse('Volume')        # [[ts_ms, v], ...]
     if not dailyk or not vols:
@@ -213,6 +210,7 @@ def main():
         finmind_val = fetch_finmind_valuation(set(codes))
 
     stocks_out = []
+    ok, fallback = 0, 0
     latest_date = None
     for i, code in enumerate(codes):
         old = prev.get(code, {})
@@ -264,6 +262,7 @@ def main():
             print(f'[warn] {code} {name} 日K失敗（{e}）→ 沿用前次')
             if old:
                 stocks_out.append(old)
+                fallback += 1
             continue
 
         price = closes[-1]
@@ -290,6 +289,7 @@ def main():
             'history': {'dates': dates[-120:], 'close': [round(c, 2) for c in closes[-120:]],
                         'volume': [round(v) for v in vols[-120:]]},
         })
+        ok += 1
         print(f'[{i + 1}/{len(codes)}] {code} {name} 收 {price}')
 
     # ---- 產業 PER 中位數 ----
@@ -313,11 +313,15 @@ def main():
     }
     with open(STOCKS_PATH, 'w', encoding='utf-8') as fp:
         json.dump(payload, fp, ensure_ascii=False, separators=(',', ':'))
-    print(f'\n完成：{len(stocks_out)} 檔寫入 {STOCKS_PATH}（as_of={payload["as_of"]}）')
-    if len(stocks_out) < len(codes) * 0.8:
-        print('[error] 成功更新檔數過少，保留失敗以保留舊資料', file=sys.stderr)
-        sys.exit(1)
+    print(f'\n完成：更新 {ok} 檔、沿用舊資料 {fallback} 檔，共 {len(stocks_out)} 檔'
+          f'（as_of={payload["as_of"]}）')
+    # 永遠 exit 0：讓 Actions 繼續建置與部署網站
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        # 最外層保險：就算整個管線炸掉也不讓 Actions 失敗（網站沿用舊資料照常部署）
+        print(f'[error] 管線異常但繼續部署: {e}', file=sys.stderr)
+    sys.exit(0)

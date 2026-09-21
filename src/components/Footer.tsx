@@ -15,7 +15,7 @@ export default function Footer() {
         {/* 品牌 */}
         <div>
           <div className="flex items-center gap-2.5">
-            <img src="/logo.svg" alt="價值雷達" width={28} height={28} />
+            <img src="logo.svg" alt="價值雷達" width={28} height={28} />
             <span className="text-base font-bold text-text-primary">價值雷達</span>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-text-muted">

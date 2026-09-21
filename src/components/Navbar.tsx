@@ -38,7 +38,7 @@ export default function Navbar() {
       <div className="container-site flex h-16 items-center justify-between gap-4">
         {/* 品牌 */}
         <Link to="/" className="flex items-center gap-2.5">
-          <img src="/logo.svg" alt="價值雷達" width={32} height={32} />
+          <img src="logo.svg" alt="價值雷達" width={32} height={32} />
           <span className="flex flex-col leading-none">
             <span className="text-lg font-bold text-text-primary">價值雷達</span>
             <span className="num mt-0.5 text-[10px] text-text-muted">ValueRadar TW</span>

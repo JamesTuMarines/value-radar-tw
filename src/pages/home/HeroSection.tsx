@@ -111,7 +111,7 @@ export default function HeroSection({ stockCount, themeCount, overheatCount, sig
       {/* grid 紋理 */}
       <div
         className="pointer-events-none absolute inset-0 opacity-20"
-        style={{ backgroundImage: 'url(/grid-texture.svg)', backgroundRepeat: 'repeat' }}
+        style={{ backgroundImage: 'url(grid-texture.svg)', backgroundRepeat: 'repeat' }}
       />
 
       <div className="container-site relative grid min-h-[92dvh] items-center gap-12 py-16 lg:grid-cols-[7fr_5fr]">
@@ -190,7 +190,7 @@ export default function HeroSection({ stockCount, themeCount, overheatCount, sig
           className="pointer-events-none absolute inset-x-0 top-1/2 mx-auto w-full max-w-[600px] -translate-y-1/2 opacity-[0.12] lg:pointer-events-auto lg:relative lg:top-auto lg:translate-y-0 lg:opacity-100"
         >
           <div data-hero="radar" className="relative aspect-square opacity-0">
-            <img src="/hero-radar.svg" alt="" className="h-full w-full" draggable={false} />
+            <img src="hero-radar.svg" alt="" className="h-full w-full" draggable={false} />
             <RadarSweep />
             {/* 浮動訊號卡 */}
             {signals.slice(0, 4).map((s, i) => (

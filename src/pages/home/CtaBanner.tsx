@@ -19,7 +19,7 @@ export default function CtaBanner() {
         }}
       >
         <img
-          src="/hero-radar.svg"
+          src="hero-radar.svg"
           alt=""
           className="pointer-events-none absolute -right-24 -top-24 w-[420px] opacity-30"
           draggable={false}

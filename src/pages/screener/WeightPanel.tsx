@@ -128,7 +128,7 @@ export default function WeightPanel({ weights, onChange, summary, scrolled }: We
       {/* 極淡網格紋理疊層 */}
       <div
         className="pointer-events-none absolute inset-0 opacity-10"
-        style={{ backgroundImage: 'url(/grid-texture.svg)', backgroundRepeat: 'repeat' }}
+        style={{ backgroundImage: 'url(grid-texture.svg)', backgroundRepeat: 'repeat' }}
         aria-hidden
       />
       <div className="relative">

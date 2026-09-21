@@ -28,7 +28,7 @@ export function useStocks(): DataState<StocksData> {
 
   useEffect(() => {
     let cancelled = false
-    fetchJson<StocksPayload>('/data/stocks.json')
+    fetchJson<StocksPayload>('data/stocks.json')
       .then((payload) => {
         if (cancelled) return
         setState({
@@ -59,7 +59,7 @@ export function useThemes(): DataState<Theme[]> {
 
   useEffect(() => {
     let cancelled = false
-    fetchJson<Theme[]>('/data/themes.json')
+    fetchJson<Theme[]>('data/themes.json')
       .then((themes) => {
         if (cancelled) return
         setState({ data: themes, loading: false, error: null })
