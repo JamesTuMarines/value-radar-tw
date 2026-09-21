@@ -18,9 +18,11 @@ const TOC: TocItem[] = [
   { id: 'm-value', num: '02', label: '低估維度' },
   { id: 'm-theme', num: '03', label: '題材維度' },
   { id: 'm-vp', num: '04', label: '量價維度' },
-  { id: 'm-filter', num: '05', label: '過濾與降評' },
-  { id: 'm-data', num: '06', label: '資料來源' },
-  { id: 'm-disclaimer', num: '07', label: '免責聲明' },
+  { id: 'm-chips', num: '05', label: '籌碼維度' },
+  { id: 'm-filter', num: '06', label: '過濾與降評' },
+  { id: 'm-buyzone', num: '07', label: '建議買進區間' },
+  { id: 'm-data', num: '08', label: '資料來源' },
+  { id: 'm-disclaimer', num: '09', label: '免責聲明' },
 ]
 
 const RATINGS = [
@@ -61,7 +63,7 @@ export default function Methodology() {
           transition={{ duration: 0.5, delay: 0.16, ease: EASE }}
           className="mt-4 max-w-[640px] text-[17px] leading-[1.7] text-text-secondary"
         >
-          每一個分數都能被驗算。本頁完整公開三維評分的指標、公式與過濾邏輯，以及資料的來源與限制。
+          每一個分數都能被驗算。本頁完整公開四維評分的指標、公式與過濾邏輯，以及資料的來源與限制。
         </motion.p>
       </header>
 
@@ -87,25 +89,28 @@ export default function Methodology() {
                 >
                   綜合分 = （<span className="text-accent-gold">低估分 × w₁</span> +{' '}
                   <span className="text-accent-cyan">題材分 × w₂</span> +{' '}
-                  <span style={{ color: '#8B7CF6' }}>量價分 × w₃</span>） ÷ （w₁ + w₂ + w₃）
+                  <span style={{ color: '#8B7CF6' }}>量價分 × w₃</span> +{' '}
+                  <span style={{ color: '#6E9BFF' }}>籌碼分 × w₄</span>） ÷ （w₁ + w₂ + w₃ + w₄）
                 </motion.p>
                 <motion.p
                   variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
                   className="num mt-3 text-sm text-text-secondary"
                 >
-                  預設權重 <span className="text-accent-gold">低估 50</span> /{' '}
+                  預設權重 <span className="text-accent-gold">低估 40</span> /{' '}
                   <span className="text-accent-cyan">題材 20</span> /{' '}
-                  <span style={{ color: '#8B7CF6' }}>量價 30</span>
+                  <span style={{ color: '#8B7CF6' }}>量價 25</span> /{' '}
+                  <span style={{ color: '#6E9BFF' }}>籌碼 15</span>
                   <span className="text-text-muted">（可調，自動正規化）</span>
                 </motion.p>
               </motion.div>
 
-              {/* 三維小卡 */}
-              <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              {/* 四維小卡 */}
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { name: '低估分', en: 'VALUATION', w: '50%', color: '#E8B64C', desc: '估值相對同業便宜，且營收仍在成長' },
+                  { name: '低估分', en: 'VALUATION', w: '40%', color: '#E8B64C', desc: '估值相對同業便宜，且營收仍在成長' },
                   { name: '題材分', en: 'THEME', w: '20%', color: '#4CC3E8', desc: '只給有真實營收暴露度的未來產業' },
-                  { name: '量價分', en: 'VOLUME · PRICE', w: '30%', color: '#8B7CF6', desc: '確認資金正用真金白銀進場投票' },
+                  { name: '量價分', en: 'VOLUME · PRICE', w: '25%', color: '#8B7CF6', desc: '確認資金正用真金白銀進場投票' },
+                  { name: '籌碼分', en: 'CHIPS', w: '15%', color: '#6E9BFF', desc: '追蹤三大法人 20 日買賣超動向' },
                 ].map((d, i) => (
                   <motion.div
                     key={d.name}
@@ -303,7 +308,65 @@ export default function Methodology() {
             </motion.div>
           </section>
 
-          {/* Section 6 — 過濾與降評 */}
+          {/* Section 6 — 籌碼維度 */}
+          <section id="m-chips" className="mt-16 scroll-mt-28">
+            <SectionHeader title="籌碼維度" eyebrow="CHIPS" />
+            <p className="mb-6 max-w-[640px] text-[15px] leading-[1.7] text-text-secondary">
+              散戶看價、法人看量。籌碼維度追蹤外資、投信、自營商三大法人的 20
+              日淨買超，確認「大戶是否與你站在同一邊」。資料來源為 FinMind 三大法人買賣超，每日更新。
+            </p>
+
+            {/* 籌碼分公式 */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, ease: EASE }}
+              className="card-surface p-6"
+            >
+              <div className="overflow-x-auto rounded-lg bg-inset px-4 py-4">
+                <p className="num whitespace-nowrap text-sm leading-relaxed text-text-primary">
+                  籌碼分 = 線性映射（法人合計20日淨買超 ÷ 20日總成交量）
+                  <br />
+                  <span className="text-text-muted">{'         '}</span>≥ +5% → 100；≤ −5% → 0；之間線性
+                  <br />
+                  <span className="text-text-muted">{'         '}</span>+ 10
+                  <span className="text-text-muted">（若投信 20 日淨買超 &gt; 0，上限 100）</span>
+                </p>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-text-secondary">
+                以「佔成交量比例」而非絕對張數評分，避免大中小型股無法比較；投信連買對波段行情特別有意義，故給予
+                +10 加成。個股缺籌碼或成交量資料時以中性 50 分計，不懲罰。
+              </p>
+            </motion.div>
+
+            <div className="mt-6">
+              <MetricTable
+                footnote="兩項合成籌碼分後，再依主力（外資持股）動向 ±5 調整（0–100，上限 100）。單位「張」，正值＝淨買超。"
+                rows={[
+                  {
+                    name: '法人淨買超佔比',
+                    def: '三大法人合計 20 日淨買超 ÷ 20 日總成交量，衡量法人吃貨／出貨強度',
+                    rule: '≥ +5% → 100（顯著吃貨）；≤ −5% → 0（顯著出貨）；之間線性內插。無資料 → 50（中性）',
+                    tip: '20 日總成交量以 20 日均量 × 20 估算。',
+                  },
+                  {
+                    name: '投信加成',
+                    def: '投信 20 日淨買超是否為正，捕捉投信連買的波段訊號',
+                    rule: '投信 20 日淨買超 > 0 → 籌碼分 +10（上限 100）',
+                  },
+                  {
+                    name: '主力調整',
+                    def: '外資持股比例近 20 個交易日的變化（百分點），捕捉主力的中長期加減碼方向',
+                    rule: '20 日變化 ≥ +0.3pp → 籌碼分 +5；≤ −0.3pp → 籌碼分 −5；之間不調整。無資料 → 不調整',
+                    tip: '資料來源 FinMind 外資持股。外資為台股最大主力，持股比例變化比單日買賣超更能反映中長期態度。',
+                  },
+                ]}
+              />
+            </div>
+          </section>
+
+          {/* Section 7 — 過濾與降評 */}
           <section id="m-filter" className="mt-16 scroll-mt-28">
             <SectionHeader title="過濾與降評：拒絕短線炒作" eyebrow="FILTERS" />
             <div className="grid gap-4 md:grid-cols-3">
@@ -343,7 +406,55 @@ export default function Methodology() {
             </div>
           </section>
 
-          {/* Section 7 — 資料來源與更新 */}
+          {/* Section 8 — 建議買進區間 */}
+          <section id="m-buyzone" className="mt-16 scroll-mt-28">
+            <SectionHeader title="建議買進區間" eyebrow="BUY ZONE" />
+            <p className="mb-6 max-w-[640px] text-[15px] leading-[1.7] text-text-secondary">
+              選到好標的，還要有好價格。個股頁的「建議買進區間」以均線結構判斷趨勢狀態，再用技術支撐機械式推算分批買進區間與參考停損價，規則完全公開、可逐檔驗算。
+            </p>
+            <MetricTable
+              footnote="趨勢狀態由現價與 MA20 / MA60 的相對位置決定；區間僅在價格、均線與 60 日歷史資料齊全時計算，否則顯示「資料不足」。"
+              rows={[
+                {
+                  name: '強勢（多頭排列）',
+                  def: '現價 > MA20 且 MA20 > MA60：趨勢向上，等待回測月線分批佈局',
+                  rule: '買進區間 = MA20 × 0.97 ~ MA20 × 1.02；參考停損 = MA60 × 0.95（跌破季線結構出場）',
+                },
+                {
+                  name: '盤整（區間整理）',
+                  def: '現價在 MA20 與 MA60 之間，或 MA20 ≤ MA60 但現價仍站上季線：以季線與前低為支撐',
+                  rule: '買進區間 = max(MA60, 60日低) × 0.99 ~ MA20 × 1.02；參考停損 = 60日低 × 0.95',
+                },
+                {
+                  name: '弱勢（跌破季線）',
+                  def: '現價 < MA60：屬左側交易，僅適合小量試單',
+                  rule: '買進區間 = 60日低 × 0.98 ~ MA60；參考停損 = 60日低 × 0.94（停損更緊，嚴控風險）',
+                },
+              ]}
+            />
+
+            {/* 過熱警示卡 */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.5, ease: EASE }}
+              className="mt-6 flex items-start gap-3 rounded-lg border-l-2 border-warn-amber bg-warn-amber/10 px-4 py-4"
+            >
+              <Flame size={16} className="mt-0.5 shrink-0 text-warn-amber" />
+              <p className="text-sm leading-relaxed text-text-secondary">
+                <span className="font-medium text-warn-amber">過熱警示：</span>
+                當標的觸發過熱降評（20 日漲幅 &gt; 40%，或貼近 52 週新高且 60 日漲幅 &gt;
+                30%），即使現價仍高於區間，也不建議追高——策略文案會改為「強烈建議等待回測至區間內再分批」。
+              </p>
+            </motion.div>
+
+            <p className="mt-4 text-xs leading-relaxed text-text-muted">
+              買進區間與停損皆為機械式規則計算，不考慮個股基本面變化、消息面與大盤系統性風險，僅供研究參考，非投資建議。
+            </p>
+          </section>
+
+          {/* Section 9 — 資料來源與更新 */}
           <section id="m-data" className="mt-16 scroll-mt-28">
             <SectionHeader title="資料來源與更新" eyebrow="DATA" />
             <div className="grid gap-4 md:grid-cols-2">
@@ -361,6 +472,7 @@ export default function Methodology() {
                     { name: '證券櫃檯買賣中心（TPEx）開放資料 API', desc: '上櫃股票行情與估值' },
                     { name: '公開資訊觀測站', desc: '月營收資料（營收年增率）' },
                     { name: 'HiStock', desc: '日 K 線歷史價量（均線、量比與型態計算）' },
+                    { name: 'FinMind', desc: '三大法人買賣超（外資 / 投信 / 自營商，籌碼分計算）' },
                   ].map((s, i) => (
                     <motion.li
                       key={s.name}
@@ -413,7 +525,7 @@ export default function Methodology() {
             </div>
           </section>
 
-          {/* Section 8 — 免責聲明 */}
+          {/* Section 10 — 免責聲明 */}
           <section id="m-disclaimer" className="mt-16 scroll-mt-28">
             <SectionHeader title="免責聲明" eyebrow="DISCLAIMER" />
             <motion.div

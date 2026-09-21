@@ -16,6 +16,19 @@ import { ROW_SPRING, type SortKey, type SortState } from './utils'
 import { cn } from '@/lib/utils'
 
 const RANK_COLORS = ['#E8B64C', '#9AA7B8', '#B0764C']
+const CHIP_BLUE = '#6E9BFF'
+
+/** 千分位 + 正負號的「張」數格式化（台股慣例：正=買超=紅） */
+function fmtLots(v: number | null | undefined): string {
+  if (v == null) return '—'
+  const abs = Math.abs(Math.round(v)).toLocaleString('en-US')
+  return v > 0 ? `+${abs}` : v < 0 ? `−${abs}` : '0'
+}
+
+function lotsColorClass(v: number | null | undefined): string {
+  if (v == null || v === 0) return 'text-text-muted'
+  return v > 0 ? 'text-up-red' : 'text-down-green'
+}
 
 /* ---------- tooltip 內容 ---------- */
 
@@ -82,6 +95,36 @@ function VpTip({ s }: { s: ScoredStock }) {
   )
 }
 
+function ChipsTip({ s }: { s: ScoredStock }) {
+  const { stock, scores } = s
+  const c = stock.chips
+  const share = scores.detail.inst_vol_share
+  return (
+    <div className="num space-y-1">
+      <div className="font-sans font-medium text-text-primary">籌碼分細項</div>
+      <div>
+        籌碼 <span style={{ color: CHIP_BLUE }}>{scores.chip_score.toFixed(1)}</span> 分
+      </div>
+      <div>法人20日淨買超 {fmtLots(c?.total_20d)} 張</div>
+      <div>
+        佔20日成交量{' '}
+        {share == null ? '—' : `${share > 0 ? '+' : share < 0 ? '−' : ''}${Math.abs(share * 100).toFixed(1)}%`}
+      </div>
+      {c && <div>外資20日 {fmtLots(c.foreign_20d)} · 投信20日 {fmtLots(c.trust_20d)}</div>}
+      {c?.foreign_ratio != null && (
+        <div>
+          外資持股 {c.foreign_ratio.toFixed(2)}%（20日{' '}
+          {c.foreign_ratio_chg_20d == null
+            ? '—'
+            : `${c.foreign_ratio_chg_20d > 0 ? '+' : c.foreign_ratio_chg_20d < 0 ? '−' : ''}${Math.abs(c.foreign_ratio_chg_20d).toFixed(2)}pp`}
+          ）
+        </div>
+      )}
+      {!c && <div className="font-sans text-text-muted">無籌碼資料，以中性 50 分計</div>}
+    </div>
+  )
+}
+
 /* ---------- 排序標題 ---------- */
 
 function SortableTh({
@@ -141,7 +184,7 @@ export default function ResultsTable({ rows, themesById, sort, onSort, rankDelta
 
   return (
     <div className="max-h-[calc(100vh-340px)] min-h-[320px] overflow-auto">
-      <table className="w-full min-w-[1040px] table-fixed border-collapse">
+      <table className="w-full min-w-[1200px] table-fixed border-collapse">
         <colgroup>
           <col className="w-12" />
           <col className="w-[180px]" />
@@ -151,6 +194,8 @@ export default function ResultsTable({ rows, themesById, sort, onSort, rankDelta
           <col className="w-[88px]" />
           <col className="w-[88px]" />
           <col className="w-[88px]" />
+          <col className="w-[88px]" />
+          <col className="w-[104px]" />
           <col className="w-24" />
           <col className="w-16" />
         </colgroup>
@@ -164,6 +209,8 @@ export default function ResultsTable({ rows, themesById, sort, onSort, rankDelta
             <SortableTh label="低估分" sortKey="value" sort={sort} onSort={onSort} />
             <SortableTh label="題材分" sortKey="theme" sort={sort} onSort={onSort} />
             <SortableTh label="量價分" sortKey="vp" sort={sort} onSort={onSort} />
+            <SortableTh label="籌碼分" sortKey="chips" sort={sort} onSort={onSort} />
+            <SortableTh label="法人20日" sortKey="inst20d" sort={sort} onSort={onSort} className="text-right" />
             <SortableTh label="綜合分" sortKey="total" sort={sort} onSort={onSort} />
             <th className="sticky top-0 z-10 bg-surface px-3 py-3 shadow-[0_1px_0_0_#232B38]" />
           </tr>
@@ -172,7 +219,7 @@ export default function ResultsTable({ rows, themesById, sort, onSort, rankDelta
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => (
               <tr key={`sk-${i}`}>
-                <td colSpan={10} className="p-0">
+                <td colSpan={12} className="p-0">
                   <SkeletonRow cols={7} />
                 </td>
               </tr>
@@ -284,6 +331,22 @@ export default function ResultsTable({ rows, themesById, sort, onSort, rankDelta
                             <ScoreBadge score={scores.volume_price_score} />
                           </span>
                         </Tooltip>
+                      </td>
+
+                      {/* 籌碼分 */}
+                      <td className="px-3 py-2.5">
+                        <Tooltip content={<ChipsTip s={s} />}>
+                          <span className="cursor-help">
+                            <ScoreBadge score={scores.chip_score} />
+                          </span>
+                        </Tooltip>
+                      </td>
+
+                      {/* 法人20日淨買超（張） */}
+                      <td className="px-3 py-2.5 text-right">
+                        <span className={cn('num text-[13px] font-medium', lotsColorClass(stock.chips?.total_20d))}>
+                          {fmtLots(stock.chips?.total_20d)}
+                        </span>
                       </td>
 
                       {/* 綜合分 */}

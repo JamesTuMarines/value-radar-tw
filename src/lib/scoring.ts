@@ -8,9 +8,10 @@ export interface ScoreWeights {
   value: number
   theme: number
   volumePrice: number
+  chips: number
 }
 
-export const DEFAULT_WEIGHTS: ScoreWeights = { value: 50, theme: 20, volumePrice: 30 }
+export const DEFAULT_WEIGHTS: ScoreWeights = { value: 40, theme: 20, volumePrice: 25, chips: 15 }
 
 export type Rating = '強力關注' | '值得追蹤' | '中性觀察' | '暫不考慮'
 
@@ -21,6 +22,8 @@ export interface ScoreBreakdown {
   theme_score: number
   /** 量價分 0–100 */
   volume_price_score: number
+  /** 籌碼分 0–100（三大法人買賣超） */
+  chip_score: number
   /** 綜合分 0–100（含過熱懲罰） */
   total_score: number
   /** 綜合分（未含過熱懲罰） */
@@ -45,6 +48,8 @@ export interface ScoreBreakdown {
     industry_per_median: number | null
     /** 近 20 日價漲量增天數占比（0–1），history 缺時為 null */
     up_vol_ratio: number | null
+    /** 法人 20 日淨買超佔 20 日總成交量比例（0–1），資料缺時為 null */
+    inst_vol_share: number | null
   }
 }
 
@@ -166,6 +171,30 @@ function detectDivergence(stock: Stock): boolean {
   return avg(last10) < avg(prev10) * 0.7
 }
 
+/* ---------------- 籌碼分（三大法人） ---------------- */
+
+/**
+ * 主體：法人合計 20 日淨買超佔 20 日總成交量比例
+ *   ≥ +5% → 100（顯著吃貨）；≤ -5% → 0（顯著出貨）；線性
+ * 投信加成：投信 20 日淨買超 > 0 → +10（投信連買對波段特別有意義），上限 100
+ * 主力調整：外資持股比例 20 日變化 ≥ +0.3pp → +5；≤ -0.3pp → -5（主力加碼/減碼確認）
+ * chips 或 avg_vol_20 缺 → 50（無資料中性，不懲罰）
+ */
+function chipScore(stock: Stock): { score: number; share: number | null } {
+  const c = stock.chips
+  if (!c || stock.avg_vol_20 == null || stock.avg_vol_20 <= 0) return { score: 50, share: null }
+  const totalVol20 = stock.avg_vol_20 * 20
+  const share = c.total_20d / totalVol20
+  let score = lerpScore(share * 100, -5, 5)
+  if (c.trust_20d > 0) score = Math.min(100, score + 10)
+  const rc = c.foreign_ratio_chg_20d
+  if (rc != null) {
+    if (rc >= 0.3) score = Math.min(100, score + 5)
+    else if (rc <= -0.3) score = Math.max(0, score - 5)
+  }
+  return { score, share }
+}
+
 /* ---------------- 過熱 ---------------- */
 
 function detectOverheat(stock: Stock): { hit: boolean; reason: string | null } {
@@ -201,10 +230,14 @@ export function computeScores(
   const pattern = patternScore(upRatio)
   const volume_price_score = 0.35 * vol + 0.35 * ma + 0.3 * pattern
 
-  const wSum = weights.value + weights.theme + weights.volumePrice
+  const chip = chipScore(stock)
+  const chip_score = chip.score
+
+  const wSum = weights.value + weights.theme + weights.volumePrice + weights.chips
   const raw =
     wSum > 0
-      ? (weights.value * value_score + weights.theme * theme_score + weights.volumePrice * volume_price_score) / wSum
+      ? (weights.value * value_score + weights.theme * theme_score +
+         weights.volumePrice * volume_price_score + weights.chips * chip_score) / wSum
       : 0
 
   const over = detectOverheat(stock)
@@ -214,6 +247,7 @@ export function computeScores(
     value_score: r1(value_score),
     theme_score: r1(theme_score),
     volume_price_score: r1(volume_price_score),
+    chip_score: r1(chip_score),
     total_score: r1(total),
     total_score_raw: r1(raw),
     rating: ratingOf(total),
@@ -231,6 +265,7 @@ export function computeScores(
       pattern_score: r1(pattern),
       industry_per_median: median,
       up_vol_ratio: upRatio == null ? null : Math.round(upRatio * 1000) / 1000,
+      inst_vol_share: chip.share == null ? null : Math.round(chip.share * 10000) / 10000,
     },
   }
 }

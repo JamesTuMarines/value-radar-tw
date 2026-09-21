@@ -166,7 +166,7 @@ export default function Themes() {
       <section className="mt-24">
         <CtaBanner
           title="用你自己的權重，重新排列這些題材"
-          subtitle="調整低估、題材、量價三維權重，所有分數在瀏覽器端即時重算。"
+          subtitle="調整低估、題材、量價、籌碼四維權重，所有分數在瀏覽器端即時重算。"
         />
       </section>
     </div>

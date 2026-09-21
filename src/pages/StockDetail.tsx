@@ -6,6 +6,8 @@ import { useStocks, useThemes } from '@/lib/data'
 import { DEFAULT_WEIGHTS } from '@/lib/scoring'
 import { scoreAll } from '@/lib/stats'
 import type { Theme } from '@/lib/types'
+import ChipsPanel from './stock-detail/ChipsPanel'
+import BuyZoneCard from './stock-detail/BuyZoneCard'
 import MetricPanels from './stock-detail/MetricPanels'
 import PeerSection from './stock-detail/PeerSection'
 import PriceChart from './stock-detail/PriceChart'
@@ -116,7 +118,7 @@ export default function StockDetail() {
       {/* Section 1 — 個股標頭 */}
       <StockHeader stock={stock} scores={scores} themesById={themesById} noteOf={noteOf} />
 
-      {/* Section 2 — 三維評分總覽列（雷達 + 四格） */}
+      {/* Section 2 — 四維評分總覽列（雷達 + 五格） */}
       <ScoreOverview stock={stock} scores={scores} rank={rank} total={scored.length} />
 
       {/* Section 3 — 價量走勢圖 */}
@@ -125,10 +127,14 @@ export default function StockDetail() {
         <PriceChart key={stock.code} stock={stock} />
       </section>
 
-      {/* Section 4 — 評分明細雙欄 */}
+      {/* Section 4 — 評分明細雙欄 + 籌碼 */}
       <section className="mt-10">
         <SectionHeader title="評分明細" eyebrow="SCORE BREAKDOWN" className="mb-4" />
         <MetricPanels stock={stock} scores={scores} />
+        <div className="mt-6 grid items-stretch gap-6 md:grid-cols-2">
+          <ChipsPanel stock={stock} scores={scores} />
+          <BuyZoneCard stock={stock} scores={scores} />
+        </div>
       </section>
 
       {/* Section 5 — 題材歸屬 */}

@@ -9,7 +9,7 @@ export const ROW_SPRING = { type: 'spring', stiffness: 300, damping: 30 } as con
 
 export type MarketFilter = 'all' | 'TW' | 'TPEx'
 export type RatingFilter = 'all' | Rating
-export type SortKey = 'name' | 'price' | 'value' | 'theme' | 'vp' | 'total'
+export type SortKey = 'name' | 'price' | 'value' | 'theme' | 'vp' | 'chips' | 'inst20d' | 'total'
 
 export interface SortState {
   key: SortKey | null
@@ -25,6 +25,8 @@ export interface Filters {
   excludeOverheat: boolean
   onlyVpStrong: boolean
   onlyHighPurity: boolean
+  /** 僅保留三大法人 20 日合計淨買超 > 0 的標的 */
+  onlyInstBuy: boolean
   /** PER 區間輸入框原始字串（空 = 不設限） */
   perMin: string
   perMax: string
@@ -38,6 +40,7 @@ export const DEFAULT_FILTERS: Filters = {
   excludeOverheat: true,
   onlyVpStrong: false,
   onlyHighPurity: false,
+  onlyInstBuy: false,
   perMin: '',
   perMax: '',
   search: '',
@@ -68,6 +71,7 @@ export function passesBaseFilters(s: ScoredStock, f: Filters, query: string): bo
   if (f.rating !== 'all' && scores.rating !== f.rating) return false
   if (f.onlyVpStrong && scores.volume_price_score < VP_STRONG_MIN) return false
   if (f.onlyHighPurity && !stock.themes.some((t) => t.purity === 'high')) return false
+  if (f.onlyInstBuy && !(stock.chips != null && stock.chips.total_20d > 0)) return false
   const lo = numOrNull(f.perMin)
   const hi = numOrNull(f.perMax)
   if (lo != null || hi != null) {
@@ -91,6 +95,7 @@ export function activeFilterCount(f: Filters, query: string): number {
   if (!f.excludeOverheat) n++
   if (f.onlyVpStrong) n++
   if (f.onlyHighPurity) n++
+  if (f.onlyInstBuy) n++
   if (numOrNull(f.perMin) != null || numOrNull(f.perMax) != null) n++
   if (query.trim() !== '') n++
   return n
@@ -113,6 +118,10 @@ export function compareBy(sort: SortState): (a: ScoredStock, b: ScoredStock) => 
         return s.scores.theme_score
       case 'vp':
         return s.scores.volume_price_score
+      case 'chips':
+        return s.scores.chip_score
+      case 'inst20d':
+        return s.stock.chips?.total_20d ?? Number.NEGATIVE_INFINITY
       default:
         return s.scores.total_score
     }
@@ -131,10 +140,11 @@ export function compareBy(sort: SortState): (a: ScoredStock, b: ScoredStock) => 
 
 /** 正規化後的權重百分比（四捨五入，合計 100） */
 export function normalizedWeights(w: ScoreWeights): ScoreWeights {
-  const sum = w.value + w.theme + w.volumePrice
-  if (sum <= 0) return { value: 0, theme: 0, volumePrice: 0 }
+  const sum = w.value + w.theme + w.volumePrice + w.chips
+  if (sum <= 0) return { value: 0, theme: 0, volumePrice: 0, chips: 0 }
   const v = Math.round((w.value / sum) * 100)
   const t = Math.round((w.theme / sum) * 100)
-  return { value: v, theme: t, volumePrice: 100 - v - t }
+  const vp = Math.round((w.volumePrice / sum) * 100)
+  return { value: v, theme: t, volumePrice: vp, chips: 100 - v - t - vp }
 }
 

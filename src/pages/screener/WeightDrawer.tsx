@@ -29,7 +29,7 @@ export default function WeightDrawer({ weights, onChange, summary, open, onOpen,
           <Scale size={16} />
           調整權重
           <span className="num text-text-secondary">
-            （{weights.value}/{weights.theme}/{weights.volumePrice}）
+            （{weights.value}/{weights.theme}/{weights.volumePrice}/{weights.chips}）
           </span>
         </motion.button>
       )}

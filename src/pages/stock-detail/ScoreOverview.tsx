@@ -12,6 +12,7 @@ const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number]
 const GOLD = '#E8B64C'
 const CYAN = '#4CC3E8'
 const PURPLE = '#8B7CF6'
+const CHIP_BLUE = '#6E9BFF'
 
 /* ---------------- 綜合分圓環 ---------------- */
 function ScoreRing({ score }: { score: number }) {
@@ -44,7 +45,7 @@ function ScoreRing({ score }: { score: number }) {
   )
 }
 
-/* ---------------- 三維雷達（自製 SVG 三角形雷達） ---------------- */
+/* ---------------- 四維雷達（自製 SVG 菱形雷達） ---------------- */
 function polar(cx: number, cy: number, r: number, deg: number): [number, number] {
   const rad = (deg * Math.PI) / 180
   return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)]
@@ -53,16 +54,17 @@ function polar(cx: number, cy: number, r: number, deg: number): [number, number]
 function ScoreRadar({ scores }: { scores: ScoreBreakdown }) {
   const cx = 100
   const cy = 100
-  const R = 68
-  // 軸：上=低估、右下=題材、左下=量價
-  const angles = [-90, 30, 150]
-  const values = [scores.value_score, scores.theme_score, scores.volume_price_score]
-  const colors = [GOLD, CYAN, PURPLE]
-  const labels = ['低估', '題材', '量價']
+  const R = 62
+  // 軸：上=低估、右=題材、下=量價、左=籌碼
+  const angles = [-90, 0, 90, 180]
+  const values = [scores.value_score, scores.theme_score, scores.volume_price_score, scores.chip_score]
+  const colors = [GOLD, CYAN, PURPLE, CHIP_BLUE]
+  const labels = ['低估', '題材', '量價', '籌碼']
   const labelPos: [number, number][] = [
     [cx, cy - R - 14],
-    [cx + R + 26, cy + R * 0.55],
-    [cx - R - 26, cy + R * 0.55],
+    [cx + R + 22, cy],
+    [cx, cy + R + 14],
+    [cx - R - 22, cy],
   ]
   const dataPoints = values
     .map((v, i) => polar(cx, cy, (Math.min(100, v) / 100) * R, angles[i]).join(','))
@@ -196,6 +198,16 @@ export default function ScoreOverview({ stock, scores, rank, total }: ScoreOverv
     scores.divergence ? '價漲量縮背離' : '無背離'
   }`
 
+  const fmtLots = (v: number) =>
+    `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(Math.round(v)).toLocaleString('en-US')}`
+  const chipSummary = !stock.chips
+    ? '無籌碼資料，以中性 50 分計'
+    : `法人20日淨買超 ${fmtLots(stock.chips.total_20d)} 張${
+        scores.detail.inst_vol_share != null
+          ? `・佔成交量 ${(Math.abs(scores.detail.inst_vol_share) * 100).toFixed(1)}%`
+          : ''
+      }`
+
   const rColor = ratingColor(scores.total_score)
 
   return (
@@ -209,7 +221,7 @@ export default function ScoreOverview({ stock, scores, rank, total }: ScoreOverv
       {/* 左：雷達 + 綜合分徽章 + 評級 + 警示徽章 */}
       <div className="rounded-xl border border-border-subtle bg-surface p-5">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-text-primary">三維評分雷達</h3>
+          <h3 className="text-base font-bold text-text-primary">四維評分雷達</h3>
           <ScoreBadge score={scores.total_score} size="lg" />
         </div>
         <div className="mt-2 flex items-center gap-2">
@@ -231,8 +243,8 @@ export default function ScoreOverview({ stock, scores, rank, total }: ScoreOverv
         </div>
       </div>
 
-      {/* 右：四格（lg 橫排 / md 2×2 / sm 直排），gap-px 形成 1px 分隔線 */}
-      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border-subtle bg-border-subtle sm:grid-cols-2 lg:grid-cols-4">
+      {/* 右：五格（lg 3 欄 / sm 2 欄），gap-px 形成 1px 分隔線 */}
+      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border-subtle bg-border-subtle sm:grid-cols-2 lg:grid-cols-3">
         {/* 綜合分 */}
         <div className="flex items-center gap-4 bg-surface p-5">
           <ScoreRing score={scores.total_score} />
@@ -250,6 +262,7 @@ export default function ScoreOverview({ stock, scores, rank, total }: ScoreOverv
         <ScoreCell label="低估分" score={scores.value_score} color={GOLD} summary={valueSummary} delay={0.15} />
         <ScoreCell label="題材分" score={scores.theme_score} color={CYAN} summary={themeSummary} delay={0.3} />
         <ScoreCell label="量價分" score={scores.volume_price_score} color={PURPLE} summary={vpSummary} delay={0.45} />
+        <ScoreCell label="籌碼分" score={scores.chip_score} color={CHIP_BLUE} summary={chipSummary} delay={0.6} />
       </div>
     </motion.section>
   )

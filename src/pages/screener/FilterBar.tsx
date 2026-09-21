@@ -186,6 +186,12 @@ export default function FilterBar({ filters, onPatch, themes, activeCount, onCle
           checked={filters.onlyHighPurity}
           onChange={(v) => onPatch({ onlyHighPurity: v })}
         />
+        <Toggle
+          label="僅法人買超"
+          color="#6E9BFF"
+          checked={filters.onlyInstBuy}
+          onChange={(v) => onPatch({ onlyInstBuy: v })}
+        />
 
         <Divider />
 

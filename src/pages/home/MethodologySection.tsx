@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { BarChart3, Layers, Scale } from 'lucide-react'
+import { BarChart3, Landmark, Layers, Scale } from 'lucide-react'
 import SectionHeader from '@/components/SectionHeader'
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number]
@@ -11,7 +11,7 @@ const DIMS = [
     color: '#E8B64C',
     title: '低估維度',
     body: 'PER 相對產業折價、PBR、殖利率、月營收年增——用四個估值錨點，衡量市場是否低估了這家公司。',
-    chip: '預設權重 50%',
+    chip: '預設權重 40%',
   },
   {
     icon: Layers,
@@ -25,7 +25,14 @@ const DIMS = [
     color: '#8B7CF6',
     title: '量價維度',
     body: '量比、均線位階、價漲量增結構——確認資金正在進場而非退場，並自動剔除過熱與量價背離的標的。',
-    chip: '預設權重 30%',
+    chip: '預設權重 25%',
+  },
+  {
+    icon: Landmark,
+    color: '#6E9BFF',
+    title: '籌碼維度',
+    body: '追蹤外資、投信、自營商三大法人 20 日淨買超佔成交量比例——確認大戶與你站在同一邊。',
+    chip: '預設權重 15%',
   },
 ]
 
@@ -33,7 +40,7 @@ export default function MethodologySection() {
   return (
     <section className="container-site py-24">
       <SectionHeader title="評分框架" eyebrow="METHODOLOGY" />
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {DIMS.map((d, i) => (
           <motion.div
             key={d.title}
@@ -93,7 +100,7 @@ export default function MethodologySection() {
           style={{ borderLeft: '3px solid #E8B64C' }}
         >
           {[
-            { code: '綜合分 = 低估分 × w₁ + 題材分 × w₂ + 量價分 × w₃', note: '# 預設 50 / 20 / 30' },
+            { code: '綜合分 = 低估分 × w₁ + 題材分 × w₂ + 量價分 × w₃ + 籌碼分 × w₄', note: '# 預設 40 / 20 / 25 / 15' },
             { code: '過熱懲罰：20日漲幅 > 40% 或 貼近52週新高且60日漲>30% → ×0.6', note: '' },
             { code: '量價背離：價漲但量縮 → 顯示「價漲量縮」警示徽章', note: '' },
           ].map((line, i) => (
@@ -106,7 +113,7 @@ export default function MethodologySection() {
               className="num whitespace-nowrap py-1.5 text-[13px] text-text-primary"
             >
               {line.code}
-              {line.note && <span className="text-text-muted">　{line.note}</span>}
+              {line.note && <span className="text-text-muted">{'　'}{line.note}</span>}
             </motion.div>
           ))}
         </motion.div>

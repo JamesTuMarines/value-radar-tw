@@ -148,7 +148,7 @@ export default function HeroSection({ stockCount, themeCount, overheatCount, sig
           </h1>
 
           <p data-hero="sub" className="mt-6 max-w-[480px] text-[17px] leading-[1.7] text-text-secondary opacity-0">
-            以估值、題材純度、量價結構三維評分，從 8 大未來產業中篩出市場還沒定價的台股標的——拒絕短線炒作，只看
+            以估值、題材純度、量價結構、法人籌碼四維評分，從 8 大未來產業中篩出市場還沒定價的台股標的——拒絕短線炒作，只看
             3–12 個月的波段機會。
           </p>
 

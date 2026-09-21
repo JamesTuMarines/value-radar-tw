@@ -135,6 +135,76 @@ def fetch_finmind_valuation(codes):
     return out
 
 
+# ---------------------------------------------------------------- 三大法人籌碼
+def fetch_chips_one(code, start_date):
+    """FinMind：單一個股三大法人買賣超（單位：股 → 回傳張）。
+    回傳 {foreign_5d, foreign_20d, trust_5d, trust_20d, dealer_20d, total_20d}，失敗回傳 None"""
+    try:
+        r = requests.get(
+            'https://api.finmindtrade.com/api/v4/data',
+            params={'dataset': 'TaiwanStockInstitutionalInvestorsBuySell',
+                    'data_id': code, 'start_date': start_date},
+            headers=UA, timeout=30)
+        rows = r.json().get('data', [])
+        if not rows:
+            return None
+        # 依日期彙總各法人淨買超（張）
+        by_date = {}
+        for row in rows:
+            dt = row['date']
+            net = (f(row.get('buy')) or 0) - (f(row.get('sell')) or 0)
+            name = row.get('name', '')
+            d = by_date.setdefault(dt, {'foreign': 0.0, 'trust': 0.0, 'dealer': 0.0})
+            if name in ('Foreign_Investor', 'Foreign_Dealer_Self'):
+                d['foreign'] += net
+            elif name == 'Investment_Trust':
+                d['trust'] += net
+            elif name in ('Dealer_self', 'Dealer_Hedging'):
+                d['dealer'] += net
+        days = sorted(by_date.keys())
+        def window(n):
+            sel = days[-n:]
+            agg = {'foreign': 0.0, 'trust': 0.0, 'dealer': 0.0}
+            for dt in sel:
+                for k in agg:
+                    agg[k] += by_date[dt][k]
+            return {k: round(v / 1000) for k, v in agg.items()}  # 股 → 張
+        w5, w20 = window(5), window(20)
+        return {
+            'foreign_5d': w5['foreign'], 'foreign_20d': w20['foreign'],
+            'trust_5d': w5['trust'], 'trust_20d': w20['trust'],
+            'dealer_20d': w20['dealer'],
+            'total_20d': w20['foreign'] + w20['trust'] + w20['dealer'],
+            'days': len(days),
+        }
+    except Exception as e:
+        print(f'[warn] {code} 法人籌碼失敗: {e}')
+        return None
+
+
+def fetch_foreign_ratio_one(code, start_date):
+    """FinMind：外資持股比例（主力動向）。回傳 (最新持股%, 20交易日變化pp)，失敗回傳 None"""
+    try:
+        r = requests.get(
+            'https://api.finmindtrade.com/api/v4/data',
+            params={'dataset': 'TaiwanStockShareholding',
+                    'data_id': code, 'start_date': start_date},
+            headers=UA, timeout=30)
+        rows = r.json().get('data', [])
+        if not rows:
+            return None
+        rows = sorted(rows, key=lambda x: x['date'])
+        latest = f(rows[-1].get('ForeignInvestmentSharesRatio'))
+        if latest is None:
+            return None
+        base = f(rows[-21].get('ForeignInvestmentSharesRatio')) if len(rows) > 21 else f(rows[0].get('ForeignInvestmentSharesRatio'))
+        chg = round(latest - base, 2) if base is not None else None
+        return {'foreign_ratio': round(latest, 2), 'foreign_ratio_chg_20d': chg}
+    except Exception as e:
+        print(f'[warn] {code} 外資持股失敗: {e}')
+        return None
+
+
 # ---------------------------------------------------------------- HiStock 日K
 def fetch_histock(code, days=370):
     u = f'https://histock.tw/stock/chip/chartdata.aspx?no={code}&days={days}&m={HIST_M}'
@@ -208,6 +278,28 @@ def main():
     if tpex is None:
         time.sleep(1)
         finmind_val = fetch_finmind_valuation(set(codes))
+
+    # ---- 三大法人籌碼 + 外資持股（主力動向）（FinMind 逐檔，約 45 天區間）----
+    chips_start = (datetime.now(TW) - timedelta(days=45)).strftime('%Y-%m-%d')
+    chips_map = {}
+    print('抓取三大法人買賣超 + 外資持股（FinMind）…')
+    for i, code in enumerate(codes):
+        c = fetch_chips_one(code, chips_start)
+        ratio = fetch_foreign_ratio_one(code, chips_start)
+        if c:
+            if ratio:
+                c.update(ratio)
+            chips_map[code] = c
+        elif code in prev and prev[code].get('chips'):
+            # 法人資料失敗但外資持股成功：舊籌碼 + 新外資持股
+            merged = dict(prev[code]['chips'])
+            if ratio:
+                merged.update(ratio)
+            chips_map[code] = merged
+        time.sleep(0.5)
+        if (i + 1) % 16 == 0:
+            print(f'  籌碼進度 {i + 1}/{len(codes)}')
+    print(f'[ok] 籌碼取得成功 {len(chips_map)}/{len(codes)} 檔')
 
     stocks_out = []
     ok, fallback = 0, 0
@@ -286,6 +378,7 @@ def main():
             'ret20': ret20, 'ret60': ret60,
             'high_52w': high_52w, 'pct_from_high': pct_from_high,
             'avg_vol_20': avg20, 'avg_vol_60': avg60,
+            'chips': chips_map.get(code) or old.get('chips'),
             'history': {'dates': dates[-120:], 'close': [round(c, 2) for c in closes[-120:]],
                         'volume': [round(v) for v in vols[-120:]]},
         })

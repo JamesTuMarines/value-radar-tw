@@ -11,6 +11,7 @@ const SLIDERS = [
   { key: 'value', label: '低估權重', color: '#E8B64C' },
   { key: 'theme', label: '題材權重', color: '#4CC3E8' },
   { key: 'volumePrice', label: '量價權重', color: '#8B7CF6' },
+  { key: 'chips', label: '籌碼權重', color: '#6E9BFF' },
 ] as const
 
 export interface WeightSummary {
@@ -25,9 +26,9 @@ interface WeightPanelInnerProps {
   summary: WeightSummary
 }
 
-/** 面板內容：標題列 + 三支滑桿 + 結果摘要（ drawer 內也重用） */
+/** 面板內容：標題列 + 四支滑桿 + 結果摘要（ drawer 內也重用） */
 export function WeightPanelBody({ weights, onChange, summary }: WeightPanelInnerProps) {
-  const sum = weights.value + weights.theme + weights.volumePrice
+  const sum = weights.value + weights.theme + weights.volumePrice + weights.chips
   const norm = normalizedWeights(weights)
 
   return (
@@ -41,7 +42,7 @@ export function WeightPanelBody({ weights, onChange, summary }: WeightPanelInner
           權重總和 <span className="text-text-secondary">{sum}%</span>
           {sum !== 100 && sum > 0 && (
             <span className="ml-2 text-accent-gold">
-              正規化 {norm.value}/{norm.theme}/{norm.volumePrice}
+              正規化 {norm.value}/{norm.theme}/{norm.volumePrice}/{norm.chips}
             </span>
           )}
         </span>

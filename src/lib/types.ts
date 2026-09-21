@@ -14,6 +14,22 @@ export interface StockHistory {
   volume: number[]
 }
 
+/** 三大法人籌碼（單位：張，正值=淨買超、負值=淨賣超） */
+export interface StockChips {
+  foreign_5d: number
+  foreign_20d: number
+  trust_5d: number
+  trust_20d: number
+  dealer_20d: number
+  total_20d: number
+  /** 統計涵蓋交易日數 */
+  days: number
+  /** 外資持股比例（%，主力動向） */
+  foreign_ratio?: number
+  /** 外資持股比例近 20 交易日變化（百分點，正=主力加碼） */
+  foreign_ratio_chg_20d?: number
+}
+
 export interface Stock {
   code: string
   name: string
@@ -35,6 +51,7 @@ export interface Stock {
   pct_from_high: number | null
   avg_vol_20: number | null
   avg_vol_60: number | null
+  chips: StockChips | null
   history: StockHistory | null
 }
 

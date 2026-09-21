@@ -117,11 +117,12 @@ export default function TopPicks({ picks, themesById, totalCount }: TopPicksProp
                 <ChangeText value={p.stock.change_pct} marker="sign" className="text-[13px]" />
               </div>
 
-              {/* 6. 三維迷你條 */}
+              {/* 6. 四維迷你條 */}
               <div className="hidden shrink-0 gap-2 md:flex">
                 <MiniBar value={p.scores.value_score} color="#E8B64C" label="低估" />
                 <MiniBar value={p.scores.theme_score} color="#4CC3E8" label="題材" />
                 <MiniBar value={p.scores.volume_price_score} color="#8B7CF6" label="量價" />
+                <MiniBar value={p.scores.chip_score} color="#6E9BFF" label="籌碼" />
               </div>
 
               {/* 7. 綜合分 */}

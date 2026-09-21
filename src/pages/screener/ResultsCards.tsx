@@ -13,7 +13,7 @@ import type { Theme } from '@/lib/types'
 import { MarketChip, TotalBadge } from './shared'
 import { ROW_SPRING } from './utils'
 
-/** 三維迷你條（水平進度條 + 色 + 數值） */
+/** 四維迷你條（水平進度條 + 色 + 數值） */
 function MiniBar({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div className="flex items-center gap-2">
@@ -105,11 +105,12 @@ export default function ResultsCards({ rows, themesById, rankDelta, loading }: R
                 <Sparkline data={stock.history?.close?.slice(-80) ?? []} width={96} height={28} />
               </div>
 
-              {/* 底列：三維迷你條 */}
+              {/* 底列：四維迷你條 */}
               <div className="mt-4 space-y-1.5">
                 <MiniBar label="低估" value={scores.value_score} color="#E8B64C" />
                 <MiniBar label="題材" value={scores.theme_score} color="#4CC3E8" />
                 <MiniBar label="量價" value={scores.volume_price_score} color="#8B7CF6" />
+                <MiniBar label="籌碼" value={scores.chip_score} color="#6E9BFF" />
               </div>
 
               {/* 題材標籤列 */}

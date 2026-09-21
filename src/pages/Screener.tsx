@@ -188,6 +188,7 @@ export default function Screener() {
       excludeOverheat: true,
       onlyVpStrong: false,
       onlyHighPurity: false,
+      onlyInstBuy: false,
       perMin: '',
       perMax: '',
     }))
@@ -358,7 +359,7 @@ export default function Screener() {
         <span>
           <span className="text-accent-gold">●</span> 評分依目前權重即時計算（低估{' '}
           <span className="num">{norm.value}</span> / 題材 <span className="num">{norm.theme}</span> / 量價{' '}
-          <span className="num">{norm.volumePrice}</span>）
+          <span className="num">{norm.volumePrice}</span> / 籌碼 <span className="num">{norm.chips}</span>）
         </span>
         <span>
           <span className="text-warn-amber">▲</span> 過熱股：20 日漲幅 &gt;40%，或貼近 52 週新高且 60 日漲幅

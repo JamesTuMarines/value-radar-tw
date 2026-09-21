@@ -142,7 +142,7 @@ export default function ThemeSection({ index, theme, stat, scoredByCode }: Theme
         {top3.length === 0 && <p className="px-2 py-4 text-sm text-text-muted">追蹤池內暫無此題材標的。</p>}
       </div>
 
-      <p className="mt-3 px-2 text-xs text-text-muted">依目前預設權重排序（低估 50 / 題材 20 / 量價 30）</p>
+      <p className="mt-3 px-2 text-xs text-text-muted">依目前預設權重排序（低估 40 / 題材 20 / 量價 25 / 籌碼 15）</p>
 
       {/* 展開完整清單 */}
       {members.length > 3 && (
