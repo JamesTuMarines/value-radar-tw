@@ -4,6 +4,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Sparkline from '@/components/Sparkline'
 import { DATA_DATE } from '@/components/Navbar'
+import { useAsOf } from '@/lib/data'
 import type { ScoredStock } from '@/lib/stats'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -38,6 +39,7 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ stockCount, themeCount, overheatCount, signals }: HeroSectionProps) {
+  const dataDate = useAsOf() ?? DATA_DATE
   const rootRef = useRef<HTMLElement>(null)
   const radarRef = useRef<HTMLDivElement>(null)
 
@@ -122,7 +124,7 @@ export default function HeroSection({ stockCount, themeCount, overheatCount, sig
             className="num inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs text-accent-cyan opacity-0"
             style={{ borderColor: 'rgba(76,195,232,0.3)' }}
           >
-            ▸ 台股波段選股工具 · 資料日期 {DATA_DATE}
+            ▸ 台股波段選股工具 · 資料日期 {dataDate}
           </span>
 
           <h1 className="mt-6 text-[36px] font-black leading-[1.15] text-text-primary lg:text-[56px]">

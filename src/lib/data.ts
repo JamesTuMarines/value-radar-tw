@@ -23,12 +23,32 @@ async function fetchJson<T>(url: string): Promise<T> {
   return (await res.json()) as T
 }
 
+/* stocks.json 模組級快取：多個元件共用同一次請求 */
+let stocksPromise: Promise<StocksPayload> | null = null
+function getStocksPayload(): Promise<StocksPayload> {
+  if (!stocksPromise) stocksPromise = fetchJson<StocksPayload>('data/stocks.json')
+  return stocksPromise
+}
+
+/** 只取資料日期（Navbar/Footer/Hero 等輕量使用，與 useStocks 共用快取） */
+export function useAsOf(): string | null {
+  const [asOf, setAsOf] = useState<string | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    getStocksPayload()
+      .then((p) => { if (!cancelled) setAsOf(p.as_of ?? null) })
+      .catch(() => { /* 失敗時維持 null，由呼叫端用 fallback */ })
+    return () => { cancelled = true }
+  }, [])
+  return asOf
+}
+
 export function useStocks(): DataState<StocksData> {
   const [state, setState] = useState<DataState<StocksData>>({ data: null, loading: true, error: null })
 
   useEffect(() => {
     let cancelled = false
-    fetchJson<StocksPayload>('data/stocks.json')
+    getStocksPayload()
       .then((payload) => {
         if (cancelled) return
         setState({

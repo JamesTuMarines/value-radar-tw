@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { DATA_DATE } from './Navbar'
+import { useAsOf } from '@/lib/data'
 
 const FEATURE_LINKS = [
   { to: '/', label: '總覽儀表板' },
@@ -9,6 +10,7 @@ const FEATURE_LINKS = [
 ]
 
 export default function Footer() {
+  const dataDate = useAsOf() ?? DATA_DATE
   return (
     <footer className="border-t border-border-subtle bg-surface">
       <div className="container-site grid gap-10 py-12 md:grid-cols-2 lg:grid-cols-4">
@@ -44,7 +46,7 @@ export default function Footer() {
             <li>TWSE 證券交易所開放資料</li>
             <li>TPEx 櫃買中心開放資料</li>
             <li>公開資訊觀測站月營收</li>
-            <li className="num text-xs">資料日期 {DATA_DATE}</li>
+            <li className="num text-xs">資料日期 {dataDate}</li>
           </ul>
         </div>
 

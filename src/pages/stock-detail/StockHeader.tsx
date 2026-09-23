@@ -9,6 +9,7 @@ import Tooltip from '@/components/Tooltip'
 import type { ScoreBreakdown } from '@/lib/scoring'
 import type { Stock, Theme } from '@/lib/types'
 import { DATA_DATE } from '@/components/Navbar'
+import { useAsOf } from '@/lib/data'
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number]
 const PURITY_LABEL = { high: '高', mid: '中', low: '低' } as const
@@ -23,6 +24,7 @@ interface StockHeaderProps {
 
 /** Section 1 — 個股標頭：麵包屑 / 名稱＋徽章 / 現價 / 題材標籤列 */
 export default function StockHeader({ stock, scores, themesById, noteOf }: StockHeaderProps) {
+  const dataDate = useAsOf() ?? DATA_DATE
   const firstTheme = stock.themes[0] ? themesById.get(stock.themes[0].id) : undefined
   const changePct = stock.change_pct
   // 由漲跌幅回推漲跌額（真實計算，非假資料）
@@ -100,7 +102,7 @@ export default function StockHeader({ stock, scores, themesById, noteOf }: Stock
             {changeAbs != null && <ChangeText value={changeAbs} marker="sign" suffix="" className="text-base" />}
             <ChangeText value={changePct} className="text-base" />
           </div>
-          <p className="num mt-1.5 text-xs text-text-muted">{DATA_DATE} 收盤</p>
+          <p className="num mt-1.5 text-xs text-text-muted">{dataDate} 收盤</p>
         </motion.div>
       </div>
 

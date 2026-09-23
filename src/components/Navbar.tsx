@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAsOf } from '@/lib/data'
 
 const NAV_LINKS = [
   { to: '/', label: '總覽' },
@@ -11,6 +12,7 @@ const NAV_LINKS = [
   { to: '/methodology', label: '方法論' },
 ]
 
+/** 資料日期 fallback（stocks.json 尚未載入時顯示）；實際值以 useAsOf() 為準 */
 export const DATA_DATE = '2026-09-18'
 
 export default function Navbar() {
@@ -18,6 +20,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const location = useLocation()
   const isScreener = location.pathname.startsWith('/screener')
+  const dataDate = useAsOf() ?? DATA_DATE
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -26,9 +29,12 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  useEffect(() => {
+  // 路由切換時關閉手機選單（render 期間調整 state 的官方模式，避免 effect 內同步 setState）
+  const [prevPath, setPrevPath] = useState(location.pathname)
+  if (prevPath !== location.pathname) {
+    setPrevPath(location.pathname)
     setOpen(false)
-  }, [location.pathname])
+  }
 
   return (
     <header
@@ -78,7 +84,7 @@ export default function Navbar() {
         <div className="hidden items-center gap-4 md:flex">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-surface px-3 py-1 text-xs text-text-muted">
             <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-down-green" />
-            資料日期 <span className="num text-text-secondary">{DATA_DATE}</span>
+            資料日期 <span className="num text-text-secondary">{dataDate}</span>
           </span>
           {!isScreener && (
             <Link
@@ -135,7 +141,7 @@ export default function Navbar() {
               ))}
               <div className="mt-2 flex items-center gap-1.5 px-3 py-2 text-xs text-text-muted">
                 <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-down-green" />
-                資料日期 <span className="num">{DATA_DATE}</span>
+                資料日期 <span className="num">{dataDate}</span>
               </div>
             </div>
           </motion.nav>

@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion'
+import { useAsOf } from '@/lib/data'
+import { DATA_DATE } from '@/components/Navbar'
 import { Link } from 'react-router-dom'
 import { BarChart3, Landmark, Layers, Scale } from 'lucide-react'
 import SectionHeader from '@/components/SectionHeader'
@@ -37,6 +39,7 @@ const DIMS = [
 ]
 
 export default function MethodologySection() {
+  const dataDate = useAsOf() ?? DATA_DATE
   return (
     <section className="container-site py-24">
       <SectionHeader title="評分框架" eyebrow="METHODOLOGY" />
@@ -81,7 +84,7 @@ export default function MethodologySection() {
           <h2 className="text-[28px] font-bold leading-[1.3] text-text-primary">透明的評分邏輯，官方資料來源</h2>
           <p className="mt-4 text-[15px] leading-[1.7] text-text-secondary">
             所有分數由原始指標即時計算，公式完全公開。資料來自證交所（TWSE）與櫃買中心（TPEx）官方開放資料，快照日期
-            2026-09-18。
+            {dataDate}。
           </p>
           <Link
             to="/methodology"
