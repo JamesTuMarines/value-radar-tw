@@ -189,6 +189,8 @@ export default function Screener() {
       onlyVpStrong: false,
       onlyHighPurity: false,
       onlyInstBuy: false,
+      onlyUptrend: false,
+      onlyVolBreakout: false,
       perMin: '',
       perMax: '',
     }))

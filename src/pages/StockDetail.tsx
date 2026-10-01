@@ -8,6 +8,7 @@ import { scoreAll } from '@/lib/stats'
 import type { Theme } from '@/lib/types'
 import ChipsPanel from './stock-detail/ChipsPanel'
 import BuyZoneCard from './stock-detail/BuyZoneCard'
+import VolumeBreakoutCard from './stock-detail/VolumeBreakoutCard'
 import MetricPanels from './stock-detail/MetricPanels'
 import PeerSection from './stock-detail/PeerSection'
 import PriceChart from './stock-detail/PriceChart'
@@ -121,10 +122,13 @@ export default function StockDetail() {
       {/* Section 2 — 四維評分總覽列（雷達 + 五格） */}
       <ScoreOverview stock={stock} scores={scores} rank={rank} total={scored.length} />
 
-      {/* Section 3 — 價量走勢圖 */}
+      {/* Section 3 — 價量走勢圖 + 型態偵測 */}
       <section className="mt-10">
         <SectionHeader title="價量走勢" eyebrow="PRICE · VOLUME" className="mb-4" />
         <PriceChart key={stock.code} stock={stock} />
+        <div className="mt-6">
+          <VolumeBreakoutCard stock={stock} />
+        </div>
       </section>
 
       {/* Section 4 — 評分明細雙欄 + 籌碼 */}

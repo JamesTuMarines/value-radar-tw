@@ -192,6 +192,18 @@ export default function FilterBar({ filters, onPatch, themes, activeCount, onCle
           checked={filters.onlyInstBuy}
           onChange={(v) => onPatch({ onlyInstBuy: v })}
         />
+        <Toggle
+          label="持續上漲"
+          color="#F0506E"
+          checked={filters.onlyUptrend}
+          onChange={(v) => onPatch({ onlyUptrend: v })}
+        />
+        <Toggle
+          label="放量突破"
+          color="#A78BFA"
+          checked={filters.onlyVolBreakout}
+          onChange={(v) => onPatch({ onlyVolBreakout: v })}
+        />
 
         <Divider />
 

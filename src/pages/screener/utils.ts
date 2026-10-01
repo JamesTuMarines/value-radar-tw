@@ -1,6 +1,8 @@
 /** Screener 頁共用：型別、常數、篩選與排序邏輯 */
 import type { Rating, ScoreWeights } from '@/lib/scoring'
 import type { ScoredStock } from '@/lib/stats'
+import type { Stock } from '@/lib/types'
+import { detectVolumeBreakout } from '@/lib/patterns'
 
 export const EASE_OUT = [0.16, 1, 0.3, 1] as [number, number, number, number]
 export const EASE_STD = [0.4, 0, 0.2, 1] as [number, number, number, number]
@@ -27,6 +29,10 @@ export interface Filters {
   onlyHighPurity: boolean
   /** 僅保留三大法人 20 日合計淨買超 > 0 的標的 */
   onlyInstBuy: boolean
+  /** 僅保留「持續上漲」標的（近 20 日上漲天數 ≥ 55% 且收盤站上 MA20） */
+  onlyUptrend: boolean
+  /** 僅保留「N 字放量突破」型態標的（放量上攻 → 量縮盤整 → 再度放量突破前高） */
+  onlyVolBreakout: boolean
   /** PER 區間輸入框原始字串（空 = 不設限） */
   perMin: string
   perMax: string
@@ -41,6 +47,8 @@ export const DEFAULT_FILTERS: Filters = {
   onlyVpStrong: false,
   onlyHighPurity: false,
   onlyInstBuy: false,
+  onlyUptrend: false,
+  onlyVolBreakout: false,
   perMin: '',
   perMax: '',
   search: '',
@@ -57,6 +65,24 @@ export const RATING_OPTIONS: { value: RatingFilter; label: string; color: string
 /** 量價轉強門檻：量價分 ≥ 60 */
 export const VP_STRONG_MIN = 60
 
+/**
+ * 持續上漲判定：近 20 個交易日「收盤高於前一交易日」的天數占比 ≥ 55%
+ * （過濾單日噴出、保留穩定墊高者），且現價站上 MA20 作多頭確認。
+ * 歷史資料或均線不足 → false（與其他開關一致的嚴格策略）。
+ */
+export function isSustainedUptrend(stock: Stock): boolean {
+  const h = stock.history
+  if (!h?.close || h.close.length < 21) return false
+  const n = h.close.length
+  let up = 0
+  for (let i = n - 20; i < n; i++) {
+    if (h.close[i] > h.close[i - 1]) up++
+  }
+  if (up / 20 < 0.55) return false
+  if (stock.price == null || stock.ma20 == null) return false
+  return stock.price >= stock.ma20
+}
+
 const numOrNull = (s: string): number | null => {
   if (s.trim() === '') return null
   const n = Number(s)
@@ -72,6 +98,8 @@ export function passesBaseFilters(s: ScoredStock, f: Filters, query: string): bo
   if (f.onlyVpStrong && scores.volume_price_score < VP_STRONG_MIN) return false
   if (f.onlyHighPurity && !stock.themes.some((t) => t.purity === 'high')) return false
   if (f.onlyInstBuy && !(stock.chips != null && stock.chips.total_20d > 0)) return false
+  if (f.onlyUptrend && !isSustainedUptrend(stock)) return false
+  if (f.onlyVolBreakout && !detectVolumeBreakout(stock)) return false
   const lo = numOrNull(f.perMin)
   const hi = numOrNull(f.perMax)
   if (lo != null || hi != null) {
@@ -96,6 +124,8 @@ export function activeFilterCount(f: Filters, query: string): number {
   if (f.onlyVpStrong) n++
   if (f.onlyHighPurity) n++
   if (f.onlyInstBuy) n++
+  if (f.onlyUptrend) n++
+  if (f.onlyVolBreakout) n++
   if (numOrNull(f.perMin) != null || numOrNull(f.perMax) != null) n++
   if (query.trim() !== '') n++
   return n
