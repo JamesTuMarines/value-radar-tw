@@ -1,5 +1,5 @@
 /** /screener — 選股篩選器（全站核心頁面） */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { LayoutGrid, RotateCcw, Table as TableIcon } from 'lucide-react'
@@ -141,20 +141,24 @@ export default function Screener() {
   const visible = sorted.slice(0, limit)
   const hasMore = sorted.length > limit
 
+  /** 桌面表格內無限滾動 + 「載入更多」按鈕共用 */
+  const loadMore = useCallback(() => setLimit((l) => l + PAGE_SIZE), [])
+
   const sentinelRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (!isMobile) return
     const el = sentinelRef.current
     if (!el) return
+    const step = isMobile ? MOBILE_STEP : PAGE_SIZE
     const ob = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) setLimit((l) => l + MOBILE_STEP)
+        if (entries[0]?.isIntersecting) setLimit((l) => l + step)
       },
       { rootMargin: '240px' },
     )
     ob.observe(el)
     return () => ob.disconnect()
-  }, [isMobile, sorted.length])
+    // limit 變動時重建 observer：新列渲染後若哨兵仍在視窗內會立即再觸發，直到全部載入
+  }, [isMobile, sorted.length, limit])
 
   /* ---------- 操作 ---------- */
   const handleSort = (key: SortKey) => {
@@ -319,6 +323,8 @@ export default function Screener() {
                     onSort={handleSort}
                     rankDelta={rankDelta}
                     loading={loading}
+                    hasMore={hasMore}
+                    onLoadMore={loadMore}
                   />
                 </motion.div>
               ) : (
@@ -349,7 +355,7 @@ export default function Screener() {
                 <span className="num text-xs text-text-muted">
                   顯示 1–{visible.length} / 共 {sorted.length} 檔
                 </span>
-                {hasMore && isMobile && <div ref={sentinelRef} className="h-px w-full" aria-hidden />}
+                {hasMore && <div ref={sentinelRef} className="h-px w-full" aria-hidden />}
               </div>
             )}
           </>

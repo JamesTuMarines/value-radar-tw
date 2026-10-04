@@ -1,4 +1,5 @@
 /** Section 4 — 評分表格（桌面）：可排序、sticky 表頭、Framer Motion layout 重排 */
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AlertTriangle, ChevronUp } from 'lucide-react'
@@ -176,14 +177,36 @@ interface ResultsTableProps {
   /** 名次變化查詢（對比上次權重計算）；僅在綜合排序時有意義 */
   rankDelta: (code: string) => number | null
   loading: boolean
+  /** 是否還有更多列可載入（配合 onLoadMore 做表格內無限滾動） */
+  hasMore?: boolean
+  /** 表格內部滾近底部時呼叫（載入更多列） */
+  onLoadMore?: () => void
 }
 
-export default function ResultsTable({ rows, themesById, sort, onSort, rankDelta, loading }: ResultsTableProps) {
+export default function ResultsTable({ rows, themesById, sort, onSort, rankDelta, loading, hasMore, onLoadMore }: ResultsTableProps) {
   const navigate = useNavigate()
   const showDelta = sort.key == null || sort.key === 'total'
 
+  // 表格內部無限滾動：哨兵放在捲動容器內，滾近底部即載入更多
+  const innerSentinelRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!hasMore || !onLoadMore) return
+    const el = innerSentinelRef.current
+    if (!el) return
+    const ob = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) onLoadMore()
+      },
+      { rootMargin: '240px' },
+    )
+    ob.observe(el)
+    return () => ob.disconnect()
+  }, [hasMore, onLoadMore, rows.length])
+
   return (
-    <div className="max-h-[calc(100vh-340px)] min-h-[320px] overflow-auto">
+    // data-lenis-prevent：讓 Lenis 放過此容器，恢復原生 wheel 內部捲動（否則滾輪在表格上會被整頁平滑捲動攔截，列永遠滾不到）
+    // overscroll-contain：內部滾到底時不把滾輪事件外溢到整頁
+    <div data-lenis-prevent className="max-h-[calc(100vh-340px)] min-h-[320px] overflow-auto overscroll-contain">
       <table className="w-full min-w-[1200px] table-fixed border-collapse">
         <colgroup>
           <col className="w-12" />
@@ -367,6 +390,7 @@ export default function ResultsTable({ rows, themesById, sort, onSort, rankDelta
           )}
         </tbody>
       </table>
+      {hasMore && <div ref={innerSentinelRef} className="h-px w-full" aria-hidden />}
     </div>
   )
 }
