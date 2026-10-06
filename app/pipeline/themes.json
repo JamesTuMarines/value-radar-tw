@@ -1,0 +1,411 @@
+[
+ {
+  "id": "siphotonics",
+  "name": "矽光子 / CPO",
+  "icon": "Zap",
+  "outlook": "AI 資料中心頻寬需求每兩年翻倍，800G→1.6T 光模組放量，NVIDIA 推動共同封裝光學（CPO）2026 年起進入商用元年，台廠在磊晶、光元件、光纖陣列與封裝環節卡位關鍵。",
+  "stocks": [
+   {
+    "code": "3081",
+    "purity": "high",
+    "note": "CW 雷射磊晶龍頭，CPO 外部光源核心供應商"
+   },
+   {
+    "code": "3163",
+    "purity": "high",
+    "note": "光纖陣列（FAU）與光模組，直接供貨美系 CSP"
+   },
+   {
+    "code": "3363",
+    "purity": "high",
+    "note": "FAU 光纖陣列，CPO 光引擎封裝關鍵件"
+   },
+   {
+    "code": "6442",
+    "purity": "high",
+    "note": "光纖連接器／外部光源模組，AWS CPO 供應鏈"
+   },
+   {
+    "code": "4979",
+    "purity": "high",
+    "note": "光收發模組代工，800G/1.6T 產線擴充"
+   },
+   {
+    "code": "4977",
+    "purity": "high",
+    "note": "光收發模組廠，400G/800G 出貨放量"
+   },
+   {
+    "code": "2455",
+    "purity": "high",
+    "note": "DFB 雷射磊晶基板，矽光子上游材料"
+   },
+   {
+    "code": "4971",
+    "purity": "high",
+    "note": "化合物半導體磊晶，光通訊磊晶片"
+   },
+   {
+    "code": "3234",
+    "purity": "high",
+    "note": "光主被動元件，TO-CAN 雷射封裝"
+   },
+   {
+    "code": "4908",
+    "purity": "high",
+    "note": "光收發模組，資料中心應用占比提升"
+   },
+   {
+    "code": "6426",
+    "purity": "mid",
+    "note": "光通訊濾光片，1.6T 模組用量倍增"
+   },
+   {
+    "code": "3450",
+    "purity": "mid",
+    "note": "光元件封裝代工，轉型矽光子封裝"
+   },
+   {
+    "code": "6451",
+    "purity": "mid",
+    "note": "SiP 封裝，布局 CPO 光電整合封裝"
+   },
+   {
+    "code": "6223",
+    "purity": "mid",
+    "note": "探針卡／測試介面，光元件測試需求"
+   },
+   {
+    "code": "6515",
+    "purity": "mid",
+    "note": "IC 測試座，矽光子晶片測試介面"
+   },
+   {
+    "code": "3711",
+    "purity": "mid",
+    "note": "封測龍頭，CPO／光電共封裝技術布局"
+   }
+  ]
+ },
+ {
+  "id": "ai_server",
+  "name": "AI 伺服器",
+  "icon": "Server",
+  "outlook": "NVIDIA GB300 機櫃 2025 下半年放量、2026 年 Rubin 世代接棒，ASIC 陣營（AWS、Google、Meta）自研晶片同步擴大，整機組裝與關鍵零組件台廠市占率全球第一。",
+  "stocks": [
+   {
+    "code": "2317",
+    "purity": "high",
+    "note": "GB 系列機櫃主力組裝廠，AI 伺服器營收占比過半"
+   },
+   {
+    "code": "2382",
+    "purity": "high",
+    "note": "AI 伺服器代工龍頭之一，CSP 直供"
+   },
+   {
+    "code": "3231",
+    "purity": "high",
+    "note": "AI 伺服器主板與整機組裝"
+   },
+   {
+    "code": "6669",
+    "purity": "high",
+    "note": "白牌 AI 伺服器龍頭，ASIC 專案核心夥伴"
+   },
+   {
+    "code": "2356",
+    "purity": "high",
+    "note": "伺服器代工，美系 CSP 訂單"
+   },
+   {
+    "code": "2376",
+    "purity": "mid",
+    "note": "伺服器主機板與整機，自有品牌+代工"
+   },
+   {
+    "code": "3706",
+    "purity": "mid",
+    "note": "伺服器與車用電子，企業級客戶"
+   },
+   {
+    "code": "4938",
+    "purity": "mid",
+    "note": "伺服器組裝與網通設備"
+   },
+   {
+    "code": "2357",
+    "purity": "mid",
+    "note": "伺服器事業群擴張中"
+   },
+   {
+    "code": "2324",
+    "purity": "mid",
+    "note": "伺服器代工轉型中"
+   }
+  ]
+ },
+ {
+  "id": "memory",
+  "name": "記憶體",
+  "icon": "MemoryStick",
+  "outlook": "AI 推論帶動 HBM 需求爆發，三大原廠產能轉向 HBM 排擠 DDR4/利基型供給，2025-2026 年記憶體進入缺貨漲價超級循環，台灣利基 DRAM、NOR、模組與封測廠全面受惠。",
+  "stocks": [
+   {
+    "code": "2408",
+    "purity": "high",
+    "note": "DRAM 製造，DDR4 漲價最大受惠者"
+   },
+   {
+    "code": "2344",
+    "purity": "high",
+    "note": "利基 DRAM＋NOR Flash 雙主力"
+   },
+   {
+    "code": "2337",
+    "purity": "high",
+    "note": "NOR Flash 龍頭，車用與 AI 邊緣需求"
+   },
+   {
+    "code": "3006",
+    "purity": "high",
+    "note": "利基 DRAM 設計，AIoT 與網通應用"
+   },
+   {
+    "code": "3260",
+    "purity": "high",
+    "note": "記憶體模組廠，庫存重估利益"
+   },
+   {
+    "code": "8299",
+    "purity": "high",
+    "note": "NAND 控制晶片龍頭，企業級 SSD 放量"
+   },
+   {
+    "code": "5351",
+    "purity": "mid",
+    "note": "利基 DRAM 設計，AI 邊緣裝置"
+   },
+   {
+    "code": "8150",
+    "purity": "mid",
+    "note": "記憶體封測廠，HBM 周邊測試"
+   },
+   {
+    "code": "6239",
+    "purity": "mid",
+    "note": "封測大廠，記憶體與邏輯雙引擎"
+   },
+   {
+    "code": "2449",
+    "purity": "mid",
+    "note": "測試廠，HBM 測試訂單挹注"
+   }
+  ]
+ },
+ {
+  "id": "advanced_packaging",
+  "name": "先進封裝",
+  "icon": "Layers",
+  "outlook": "CoWoS 產能 2026 年持續倍增，SoIC、面板級封裝（FOPLP）接續上路，先進封裝從 2.5D 走向 3D，測試時間拉長、設備投資強勁，封測與設備供應鏈迎來結構性成長。",
+  "stocks": [
+   {
+    "code": "3711",
+    "purity": "high",
+    "note": "全球封測龍頭，CoWoS 後段核心"
+   },
+   {
+    "code": "2449",
+    "purity": "high",
+    "note": "測試大廠，AI 晶片測試時間倍增受惠"
+   },
+   {
+    "code": "6239",
+    "purity": "high",
+    "note": "封測大廠，先進封裝產能擴充"
+   },
+   {
+    "code": "6515",
+    "purity": "high",
+    "note": "高階測試座，CoWoS 測試介面市占高"
+   },
+   {
+    "code": "6223",
+    "purity": "high",
+    "note": "探針卡龍頭，先進封裝測試需求"
+   },
+   {
+    "code": "3131",
+    "purity": "high",
+    "note": "晶圓級封裝設備，台積電供應鏈"
+   },
+   {
+    "code": "6187",
+    "purity": "high",
+    "note": "半導體設備，CoWoS 製程設備"
+   },
+   {
+    "code": "6789",
+    "purity": "high",
+    "note": "光罩與晶圓級光學封裝，台積電轉投資"
+   },
+   {
+    "code": "3583",
+    "purity": "mid",
+    "note": "半導體設備代理與自製，先進封裝布局"
+   }
+  ]
+ },
+ {
+  "id": "thermal",
+  "name": "散熱 / 液冷",
+  "icon": "Fan",
+  "outlook": "AI 機櫃功率密度突破 120kW，氣冷極限已至，液冷（Cold Plate→Immersion）滲透率 2026 年跳升，散熱產值單櫃倍數成長，台廠掌握全球伺服器散熱七成市占。",
+  "stocks": [
+   {
+    "code": "3017",
+    "purity": "high",
+    "note": "散熱模組龍頭，液冷板與機櫃整合"
+   },
+   {
+    "code": "3324",
+    "purity": "high",
+    "note": "伺服器散熱大廠，液冷產品線完整"
+   },
+   {
+    "code": "3653",
+    "purity": "high",
+    "note": "均熱片龍頭，直接供貨 GPU 大廠"
+   },
+   {
+    "code": "2421",
+    "purity": "high",
+    "note": "散熱風扇龍頭，伺服器風扇市占第一"
+   },
+   {
+    "code": "8996",
+    "purity": "high",
+    "note": "液冷板與熱交換器，水冷核心件"
+   },
+   {
+    "code": "3483",
+    "purity": "high",
+    "note": "散熱模組廠，液冷轉型積極"
+   },
+   {
+    "code": "3338",
+    "purity": "mid",
+    "note": "散熱模組廠，伺服器占比提升"
+   }
+  ]
+ },
+ {
+  "id": "power",
+  "name": "電源 / 電力設備",
+  "icon": "Plug",
+  "outlook": "AI 機櫃電源從 3kW 走向 12kW+，HVDC 高壓直流架構重寫電源設計，加上台電強韌電網計畫與美國電網更新潮，電源供應器與重電設備迎來十年級需求。",
+  "stocks": [
+   {
+    "code": "2308",
+    "purity": "high",
+    "note": "電源供應器全球龍頭，AI 電源與 HVDC 領先"
+   },
+   {
+    "code": "1519",
+    "purity": "high",
+    "note": "變壓器大廠，美國電網更新主力供應商"
+   },
+   {
+    "code": "6409",
+    "purity": "high",
+    "note": "UPS 不斷電系統，資料中心電力備援"
+   },
+   {
+    "code": "6412",
+    "purity": "mid",
+    "note": "電源供應器廠，AI 伺服器電源布局"
+   },
+   {
+    "code": "2385",
+    "purity": "mid",
+    "note": "電源與鍵盤雙主業，AI 電源滲透中"
+   },
+   {
+    "code": "1503",
+    "purity": "mid",
+    "note": "重電設備，台電強韌電網受惠"
+   }
+  ]
+ },
+ {
+  "id": "satellite",
+  "name": "低軌衛星",
+  "icon": "Satellite",
+  "outlook": "Starlink 用戶突破 800 萬、Kuiper 進入密集發射期，2026 年全球低軌衛星發射量創新高，地面接收站、相位陣列天線與射頻元件需求倍增，台廠為主要代工夥伴。",
+  "stocks": [
+   {
+    "code": "3491",
+    "purity": "high",
+    "note": "微波／毫米波元件，衛星酬載核心供應商"
+   },
+   {
+    "code": "6285",
+    "purity": "high",
+    "note": "低軌衛星地面設備代工主力"
+   },
+   {
+    "code": "2314",
+    "purity": "high",
+    "note": "衛星地面站系統，訂單能見度高"
+   },
+   {
+    "code": "5388",
+    "purity": "mid",
+    "note": "網通設備，衛星接收終端布局"
+   },
+   {
+    "code": "2379",
+    "purity": "mid",
+    "note": "網通晶片，衛星連網晶片開發中"
+   }
+  ]
+ },
+ {
+  "id": "robot",
+  "name": "機器人",
+  "icon": "Bot",
+  "outlook": "人形機器人 2026 年進入量產元年，Tesla Optimus、Figure 等新創訂單落地，線性傳動、減速機、伺服馬達與機器視覺需求從樣品走向批量，台灣精密機械供應鏈直接受惠。",
+  "stocks": [
+   {
+    "code": "2049",
+    "purity": "high",
+    "note": "線性傳動龍頭，人形機器人關鍵零組件"
+   },
+   {
+    "code": "1597",
+    "purity": "high",
+    "note": "線性滑軌／螺桿，機器人傳動元件"
+   },
+   {
+    "code": "2360",
+    "purity": "mid",
+    "note": "量測設備，機器人視覺檢測"
+   },
+   {
+    "code": "2395",
+    "purity": "mid",
+    "note": "工業電腦龍頭，機器人控制器"
+   },
+   {
+    "code": "1504",
+    "purity": "mid",
+    "note": "馬達大廠，伺服與 EV 動力布局"
+   },
+   {
+    "code": "1590",
+    "purity": "mid",
+    "note": "氣動元件龍頭，自動化長期受惠"
+   }
+  ]
+ }
+]

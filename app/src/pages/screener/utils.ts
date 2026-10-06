@@ -1,0 +1,180 @@
+/** Screener 頁共用：型別、常數、篩選與排序邏輯 */
+import type { Rating, ScoreWeights } from '@/lib/scoring'
+import type { ScoredStock } from '@/lib/stats'
+import type { Stock } from '@/lib/types'
+import { detectVolumeBreakout } from '@/lib/patterns'
+
+export const EASE_OUT = [0.16, 1, 0.3, 1] as [number, number, number, number]
+export const EASE_STD = [0.4, 0, 0.2, 1] as [number, number, number, number]
+/** 表格列重排 spring（全站招牌互動） */
+export const ROW_SPRING = { type: 'spring', stiffness: 300, damping: 30 } as const
+
+export type MarketFilter = 'all' | 'TW' | 'TPEx'
+export type RatingFilter = 'all' | Rating
+export type SortKey = 'name' | 'price' | 'value' | 'theme' | 'vp' | 'chips' | 'inst20d' | 'total'
+
+export interface SortState {
+  key: SortKey | null
+  dir: 'asc' | 'desc'
+}
+
+export const DEFAULT_SORT: SortState = { key: null, dir: 'desc' }
+
+export interface Filters {
+  themes: string[]
+  market: MarketFilter
+  rating: RatingFilter
+  excludeOverheat: boolean
+  onlyVpStrong: boolean
+  onlyHighPurity: boolean
+  /** 僅保留三大法人 20 日合計淨買超 > 0 的標的 */
+  onlyInstBuy: boolean
+  /** 僅保留「持續上漲」標的（近 20 日上漲天數 ≥ 55% 且收盤站上 MA20） */
+  onlyUptrend: boolean
+  /** 僅保留「N 字放量突破」型態標的（放量上攻 → 量縮盤整 → 再度放量突破前高） */
+  onlyVolBreakout: boolean
+  /** PER 區間輸入框原始字串（空 = 不設限） */
+  perMin: string
+  perMax: string
+  search: string
+}
+
+export const DEFAULT_FILTERS: Filters = {
+  themes: [],
+  market: 'all',
+  rating: 'all',
+  excludeOverheat: true,
+  onlyVpStrong: false,
+  onlyHighPurity: false,
+  onlyInstBuy: false,
+  onlyUptrend: false,
+  onlyVolBreakout: false,
+  perMin: '',
+  perMax: '',
+  search: '',
+}
+
+export const RATING_OPTIONS: { value: RatingFilter; label: string; color: string }[] = [
+  { value: 'all', label: '全部評級', color: '#9AA7B8' },
+  { value: '強力關注', label: '強力關注', color: '#2EBD85' },
+  { value: '值得追蹤', label: '值得追蹤', color: '#E8B64C' },
+  { value: '中性觀察', label: '中性觀察', color: '#F08C3C' },
+  { value: '暫不考慮', label: '暫不考慮', color: '#E5484D' },
+]
+
+/** 量價轉強門檻：量價分 ≥ 60 */
+export const VP_STRONG_MIN = 60
+
+/**
+ * 持續上漲判定：近 20 個交易日「收盤高於前一交易日」的天數占比 ≥ 55%
+ * （過濾單日噴出、保留穩定墊高者），且現價站上 MA20 作多頭確認。
+ * 歷史資料或均線不足 → false（與其他開關一致的嚴格策略）。
+ */
+export function isSustainedUptrend(stock: Stock): boolean {
+  const h = stock.history
+  if (!h?.close || h.close.length < 21) return false
+  const n = h.close.length
+  let up = 0
+  for (let i = n - 20; i < n; i++) {
+    if (h.close[i] > h.close[i - 1]) up++
+  }
+  if (up / 20 < 0.55) return false
+  if (stock.price == null || stock.ma20 == null) return false
+  return stock.price >= stock.ma20
+}
+
+const numOrNull = (s: string): number | null => {
+  if (s.trim() === '') return null
+  const n = Number(s)
+  return Number.isFinite(n) ? n : null
+}
+
+/** 過熱開關以外的所有篩選條件（用於計算「已過熱剔除」數） */
+export function passesBaseFilters(s: ScoredStock, f: Filters, query: string): boolean {
+  const { stock, scores } = s
+  if (f.themes.length > 0 && !stock.themes.some((t) => f.themes.includes(t.id))) return false
+  if (f.market !== 'all' && stock.market !== f.market) return false
+  if (f.rating !== 'all' && scores.rating !== f.rating) return false
+  if (f.onlyVpStrong && scores.volume_price_score < VP_STRONG_MIN) return false
+  if (f.onlyHighPurity && !stock.themes.some((t) => t.purity === 'high')) return false
+  if (f.onlyInstBuy && !(stock.chips != null && stock.chips.total_20d > 0)) return false
+  if (f.onlyUptrend && !isSustainedUptrend(stock)) return false
+  if (f.onlyVolBreakout && !detectVolumeBreakout(stock)) return false
+  const lo = numOrNull(f.perMin)
+  const hi = numOrNull(f.perMax)
+  if (lo != null || hi != null) {
+    if (stock.per == null || stock.per <= 0) return false
+    if (lo != null && stock.per < lo) return false
+    if (hi != null && stock.per > hi) return false
+  }
+  if (query) {
+    const q = query.toLowerCase()
+    if (!stock.code.toLowerCase().includes(q) && !stock.name.toLowerCase().includes(q)) return false
+  }
+  return true
+}
+
+/** 非預設條件數（過熱開關關閉也算一個非預設狀態） */
+export function activeFilterCount(f: Filters, query: string): number {
+  let n = 0
+  if (f.themes.length > 0) n++
+  if (f.market !== 'all') n++
+  if (f.rating !== 'all') n++
+  if (!f.excludeOverheat) n++
+  if (f.onlyVpStrong) n++
+  if (f.onlyHighPurity) n++
+  if (f.onlyInstBuy) n++
+  if (f.onlyUptrend) n++
+  if (f.onlyVolBreakout) n++
+  if (numOrNull(f.perMin) != null || numOrNull(f.perMax) != null) n++
+  if (query.trim() !== '') n++
+  return n
+}
+
+/** 排序比較器；key 為 null 時回歸預設（綜合分降冪） */
+export function compareBy(sort: SortState): (a: ScoredStock, b: ScoredStock) => number {
+  const key = sort.key ?? 'total'
+  const dir = sort.key == null ? 'desc' : sort.dir
+  const sign = dir === 'asc' ? 1 : -1
+  const val = (s: ScoredStock): number | string => {
+    switch (key) {
+      case 'name':
+        return s.stock.name
+      case 'price':
+        return s.stock.price ?? Number.NEGATIVE_INFINITY
+      case 'value':
+        return s.scores.value_score
+      case 'theme':
+        return s.scores.theme_score
+      case 'vp':
+        return s.scores.volume_price_score
+      case 'chips':
+        return s.scores.chip_score
+      case 'inst20d':
+        return s.stock.chips?.total_20d ?? Number.NEGATIVE_INFINITY
+      default:
+        return s.scores.total_score
+    }
+  }
+  return (a, b) => {
+    const va = val(a)
+    const vb = val(b)
+    let c =
+      typeof va === 'string' || typeof vb === 'string'
+        ? String(va).localeCompare(String(vb), 'zh-Hant')
+        : va - vb
+    if (c === 0) c = b.scores.total_score - a.scores.total_score
+    return c * sign
+  }
+}
+
+/** 正規化後的權重百分比（四捨五入，合計 100） */
+export function normalizedWeights(w: ScoreWeights): ScoreWeights {
+  const sum = w.value + w.theme + w.volumePrice + w.chips
+  if (sum <= 0) return { value: 0, theme: 0, volumePrice: 0, chips: 0 }
+  const v = Math.round((w.value / sum) * 100)
+  const t = Math.round((w.theme / sum) * 100)
+  const vp = Math.round((w.volumePrice / sum) * 100)
+  return { value: v, theme: t, volumePrice: vp, chips: 100 - v - t - vp }
+}
+
